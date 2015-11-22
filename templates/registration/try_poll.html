@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load polls %}
+{% load staticfiles %}
+
+{% block additional_static %}
+    <script src="{% static 'script.js' %}"></script>
+    <script src="{% static 'jquery.cookie.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <h2>{{ poll.name }}</h2>
+        {% for question in poll.questions.all %}
+            {% answered question as user_answered %}
+            <h3>{{ question.text }}</h3>
+                <div class="question">
+                    <select data-question="{{ question.id }}" class="form-control"{% if user_answered %}
+                                disabled
+                            {% endif %}
+                            {% if  question.is_multiple %}multiple{% endif %}
+                    >
+                        {% for answer in question.answers.all %}
+                            <option id="{{ answer.id }}">{{ answer.text }}</option>
+                        {% endfor %}
+                    </select><br>
+                    {% if not user_answered %}
+                        <button type="button" class="btn btn-primary answer">Ответить</button>
+                    {% endif %}
+                </div>
+        {% endfor %}
+{% endblock %}
