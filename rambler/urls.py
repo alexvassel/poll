@@ -18,4 +18,10 @@ urlpatterns = [
     url(r'^$', views.main.PollListView.as_view(), name='index'),
     url(r'^poll/try/(?P<slug>[\w-]+)/$', views.main.TryPoll.as_view(),
 
+    # Auth
+    url(r'^registration/login/$', 'django.contrib.auth.views.login'),
+    url(r'^registration/logout/$', 'django.contrib.auth.views.logout',
+        {'next_page': '/'}),
+    url(r'^registration/register/$', views.auth.register, name='register'),
+
 ]
