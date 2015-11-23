@@ -17,7 +17,7 @@ class PollListView(ListView):
     context_object_name = 'polls'
 
     def get_queryset(self):
-        return Poll.objects.all().order_by('-weight', '-user__weight')
+        return Poll.objects.all().order_by('-weight', '-created__weight')
 
 
 class PollDetailView(DetailView):

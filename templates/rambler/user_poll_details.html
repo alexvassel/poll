@@ -1,30 +1,35 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{{ poll.name }},
-        <a href="{% url "user_poll_edit" request.user.polluser poll.pk %}">Редактировать</a>,
-        Поделиться ссылкой - {{ request.get_host }}{% url "try_poll" poll.slug %},
+    <h3>Опрос - <a href="{% url "user_poll_edit" request.user.polluser poll.pk %}">{{ poll.name }}</a>
+        <br><br>
+        Ссылка для прохождения - <code>http://{{ request.get_host }}{% url "try_poll" poll.slug %}</code>
+        <br><br>
         <form method="POST" action="{% url "user_poll_delete" request.user.polluser poll.pk %}">
             {% csrf_token %}
-            <input type="submit" value="Удалить"/>
+            <input type="submit" value="Удалить опрос" class="btn btn-danger"/>
         </form>
-    </h2>
+    </h3>
     <ul class="list-group">
         {% for question in poll.questions.all %}
-            <li class="list-group-item">
-                <a href="{% url "question_edit" request.user.polluser poll.pk question.pk %}">{{ question.text }}</a>
+            <li class="list-group-item active">
+                {{ question.text }}
+                <br><br>
                 <form method="POST" action="{% url "question_delete" request.user.polluser question.poll.pk question.pk %}">
                     {% csrf_token %}
-                    <input type="submit" value="Удалить"/>
+                    <input type="submit" value="Удалить вопрос" class="btn btn-danger btn-xs"/>
                 </form>
+                <br>
+                <a href="{% url "question_edit" request.user.polluser poll.pk question.pk %} %}" class="btn btn-info btn-xs" role="button">Редактировать</a>
             </li>
             <ul class="list-group">
                 {% for answer in question.answers.all %}
                     <li class="list-group-item">
                         <a href="{% url "answer_edit" request.user.polluser poll.pk question.pk answer.pk %}">{{ answer.text }}</a>
+                        <br><br>
                         <form method="POST" action="{% url "answer_delete" request.user.polluser answer.question.poll.pk answer.question.pk answer.pk %}">
                             {% csrf_token %}
-                            <input type="submit" value="Удалить"/>
+                            <input type="submit" value="Удалить ответ" class="btn btn-danger btn-xs"/>
                     </form>
                     </li>
                 {% endfor %}

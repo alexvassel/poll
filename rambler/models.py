@@ -26,12 +26,12 @@ class Poll(models.Model):
     name = models.CharField(max_length=30, verbose_name=u'Имя')
     slug = models.SlugField(unique=True, max_length=30)
     weight = models.PositiveSmallIntegerField(verbose_name='Вес')
-    user = models.ForeignKey(PollUser, blank=True, null=True)
     created = models.ForeignKey(PollUser, related_name='created_polls')
 
     def get_absolute_url(self):
         return '/{0}/poll/{1}/'.format(self.created.user.username, self.pk)
 
+    # TODO только если создаем объект
     def save(self, *args, **kwargs):
         self.slug = slugify(unidecode(self.name))
         super(Poll, self).save(*args, **kwargs)

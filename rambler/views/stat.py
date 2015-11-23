@@ -20,7 +20,7 @@ class PollsPopularView(ListView):
 
 
 class QuestionsPopularView(ListView):
-    template_name = 'rambler/poll_popular_stat.html'
+    template_name = 'rambler/question_popular_stat.html'
     context_object_name = 'polls'
 
     def get_queryset(self):
