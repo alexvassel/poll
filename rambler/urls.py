@@ -5,15 +5,18 @@ from django.contrib import admin
 
 import views.auth
 import views.main
+import views.stat
 
 urlpatterns = [
     # Админка
     url(r'^admin/', include(admin.site.urls)),
 
     # Общие
+    url(r'^poll/(?P<pk>\d+)/finish/$', views.main.PollFinishView.as_view(),
+        name='finish_poll'),
     url(r'^poll/(?P<pk>\d+)/$', views.main.PollDetailView.as_view(),
         name='poll_details'),
-    url(r'^poll/try/(?P<slug>[\w-]+)/$', views.main.TryPoll.as_view(),
+    url(r'^poll/(?P<slug>[\w-]+)/try/$', views.main.PollTryView.as_view(),
         name='try_poll'),
     url(r'^$', views.main.PollListView.as_view(), name='index'),
 
@@ -53,8 +56,10 @@ urlpatterns = [
         name='user_polls'),
 
     # Статистика
-    url(r'^(?P<username>\w+)/statistics/',
-        views.main.UserPollListView.as_view(), name='user_statistics'),
+    url(r'^(?P<username>\w+)/statistics/polls/',
+        views.stat.PollsPopularView.as_view(), name='user_poll_stat'),
+    url(r'^(?P<username>\w+)/statistics/questions/',
+        views.stat.QuestionsPopularView.as_view(), name='user_questions_stat'),
 
 
     # Авторизация

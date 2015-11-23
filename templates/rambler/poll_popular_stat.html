@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Мои опросы</h2>
+    <ul>
+        {% for poll in polls %}
+            <li>Опрос - {{ poll.name }}, Пройден раз - {{ poll.cnt }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

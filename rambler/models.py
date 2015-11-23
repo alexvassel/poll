@@ -26,10 +26,11 @@ class Poll(models.Model):
     name = models.CharField(max_length=30, verbose_name=u'Имя')
     slug = models.SlugField(unique=True, max_length=30)
     weight = models.PositiveSmallIntegerField(verbose_name='Вес')
-    user = models.ForeignKey(PollUser)
+    user = models.ForeignKey(PollUser, blank=True, null=True)
+    created = models.ForeignKey(PollUser, related_name='created_polls')
 
     def get_absolute_url(self):
-        return '/my_polls/poll/{}/'.format(self.pk)
+        return '/{0}/poll/{1}/'.format(self.created.user.username, self.pk)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(unidecode(self.name))
@@ -62,7 +63,7 @@ class Question(models.Model):
         return True if self.kind == self.KIND_CHOICES[1][0] else False
 
     def get_absolute_url(self):
-        return '/my_polls/poll/{}/'.format(self.poll.pk)
+        return '/{0}/poll/{1}/'.format(self.poll.created.user.username, self.poll.pk)
 
     def __unicode__(self):
         return u'{}'.format(self.text)
@@ -74,7 +75,8 @@ class Answer(models.Model):
     text = models.TextField()
 
     def get_absolute_url(self):
-        return '/my_polls/poll/{}/'.format(self.question.poll.pk)
+        return '/{0}/poll/{1}/'.format(self.question.poll.created.user.username,
+                                       self.question.poll.pk)
 
     def __unicode__(self):
         return u'{}'.format(self.text)

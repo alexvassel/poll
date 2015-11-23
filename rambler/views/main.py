@@ -3,7 +3,7 @@
 from django.http import JsonResponse
 
 from django.views.generic import (ListView, DetailView, CreateView,
-                                  UpdateView, DeleteView)
+                                  UpdateView, DeleteView, View)
 
 from rambler.forms import PollForm, QuestionForm, AnswerForm
 from rambler.helpers import get_context_mixin, STATUSES
@@ -26,8 +26,19 @@ class PollDetailView(DetailView):
     template_name = 'rambler/poll_details.html'
 
 
-class TryPoll(PollDetailView):
+class PollTryView(PollDetailView):
+    """Вывод шаблона для прохождения опроса,
+    а также сохранение ответа на вопрос
+    """
     template_name = 'rambler/try_poll.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PollTryView, self).get_context_data(**kwargs)
+        # Сохраняем текущий опрос как начатый пользователем
+        user = self.request.user.polluser
+        poll = self.get_object()
+        user.polls_in_progress.add(poll)
+        return context
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользоватля"""
@@ -47,11 +58,25 @@ class TryPoll(PollDetailView):
         return JsonResponse({'status': STATUSES['OK']})
 
 
+class PollFinishView(View):
+    """Помечаем опрос, как завершенный данным пользователем"""
+    def post(self, request, *args, **kw):
+        poll_pk = request.POST.get('poll_pk')
+        user = self.request.user.polluser
+        poll = Poll.objects.get(pk=poll_pk)
+
+        # Опрос переходит из polls_in_progress в finished_polls
+        user.polls_in_progress.remove(poll)
+        user.finished_polls.add(poll)
+
+        return JsonResponse({'status': STATUSES['OK']})
+
+
 class UserPollListView(PollListView):
     template_name = 'rambler/user_polls.html'
 
     def get_queryset(self):
-        return Poll.objects.filter(user=self.request.user.polluser)
+        return Poll.objects.filter(created=self.request.user.polluser)
 
 
 class UserPollDetailView(PollDetailView):
@@ -64,7 +89,7 @@ class PollCreateView(CreateView):
     template_name = 'rambler/user_add_form.html'
 
     def form_valid(self, form):
-        form.instance.user = self.request.user.polluser
+        form.instance.created = self.request.user.polluser
         return super(PollCreateView, self).form_valid(form)
 
 
@@ -78,7 +103,7 @@ class PollDeleteView(DeleteView):
     model = Poll
 
     def get_success_url(self):
-        return '/my_polls/'
+        return '/{0}/polls/'.format(self.object.created.user.username)
 
 
 # Вопросы
@@ -92,7 +117,7 @@ class QuestionCreateView(QuestionContextMixin, CreateView):
     template_name = 'rambler/user_add_form.html'
 
     def form_valid(self, form):
-        form.instance.poll = Poll.objects.get(pk=self.kwargs['pk'])
+        form.instance.poll = Poll.objects.get(pk=self.kwargs['top_object_pk'])
         return super(QuestionCreateView, self).form_valid(form)
 
 
@@ -106,7 +131,8 @@ class QuestionDeleteView(DeleteView):
     model = Question
 
     def get_success_url(self):
-        return '/my_polls/poll/{}/'.format(self.object.poll.pk)
+        return '/{0}/poll/{1}/'.format(self.object.poll.created.user.username,
+                                       self.object.poll.pk)
 
 
 # Ответы
@@ -119,7 +145,8 @@ class AnswerCreateView(AnswerContextMixin, CreateView):
     template_name = 'rambler/user_add_form.html'
 
     def form_valid(self, form):
-        form.instance.question = Question.objects.get(pk=self.kwargs['q_pk'])
+        form.instance.question = (Question.objects.
+                                  get(pk=self.kwargs['top_object_pk']))
         return super(AnswerCreateView, self).form_valid(form)
 
 
@@ -133,4 +160,6 @@ class AnswerDeleteView(DeleteView):
     model = Answer
 
     def get_success_url(self):
-        return '/my_polls/poll/{}/'.format(self.object.question.poll.pk)
+        return '/{0}/poll/{1}/'.format(self.object.question.poll.
+                                       created.user.username,
+                                       self.object.question.poll.pk)

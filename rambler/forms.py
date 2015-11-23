@@ -8,7 +8,7 @@ from rambler.models import Poll, Question, Answer
 class PollForm(forms.ModelForm):
     class Meta:
         model = Poll
-        exclude = ['slug', 'user']
+        exclude = ['slug', 'user', 'created']
 
 
 class QuestionForm(forms.ModelForm):

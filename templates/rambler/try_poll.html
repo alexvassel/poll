@@ -9,12 +9,12 @@
 {% endblock %}
 
 {% block content %}
-    <h2>{{ poll.name }}</h2>
+    <h2 data-pk="{{ poll.pk }}" id="poll" data-finish_url="{% url 'finish_poll' poll.pk %}">{{ poll.name }}</h2>
         {% for question in poll.questions.all %}
             {% answered question as user_answered %}
             <h3>{{ question.text }}</h3>
                 <div class="question">
-                    <select data-question="{{ question.pk }}" class="form-control"{% if user_answered %}
+                    <select data-question="{{ question.pk }}" class="form-control question-root"{% if user_answered %}
                                 disabled
                             {% endif %}
                             {% if  question.is_multiple %}multiple{% endif %}
@@ -28,4 +28,6 @@
                     {% endif %}
                 </div>
         {% endfor %}
+    <br><br>
+    <a href="#" class="btn btn-danger finish-poll" role="button">Завершить опрос</a>
 {% endblock %}
