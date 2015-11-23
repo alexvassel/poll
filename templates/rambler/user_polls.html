@@ -5,11 +5,11 @@
     <ul>
         {% for poll in polls %}
             <li>
-                <a href="{% url 'user_poll_details' poll.pk %}">
+                <a href="{% url 'user_poll_details' request.user.polluser poll.pk %}">
                     {{ poll.name }}
                 </a>
             </li>
         {% endfor %}
     </ul>
-    <a href="{% url 'user_poll_add' %}" class="btn btn-info" role="button">Создать опрос</a>
+    <a href="{% url 'user_poll_add' request.user.polluser %}" class="btn btn-info" role="button">Создать опрос</a>
 {% endblock %}
