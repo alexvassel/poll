@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from unidecode import unidecode
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.template.defaultfilters import slugify
-from unidecode import unidecode
 
 
 class PollUser(models.Model):
@@ -22,13 +23,13 @@ class PollUser(models.Model):
 class Poll(models.Model):
     """
     """
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=30, verbose_name=u'Имя')
     slug = models.SlugField(unique=True, max_length=30)
-    weight = models.PositiveSmallIntegerField()
+    weight = models.PositiveSmallIntegerField(verbose_name='Вес')
     user = models.ForeignKey(PollUser)
 
     def get_absolute_url(self):
-        return '/poll/{}/'.format(self.slug)
+        return '/my_polls/poll/{}/'.format(self.pk)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(unidecode(self.name))
@@ -36,6 +37,9 @@ class Poll(models.Model):
 
     def __unicode__(self):
         return u'{}'.format(self.name)
+
+    def get_anonymous_url(self):
+        return '/poll/{}/'.format(self.pk)
 
 
 class Question(models.Model):
@@ -57,8 +61,11 @@ class Question(models.Model):
     def is_multiple(self):
         return True if self.kind == self.KIND_CHOICES[1][0] else False
 
+    def get_absolute_url(self):
+        return '/my_polls/poll/{}/'.format(self.poll.pk)
+
     def __unicode__(self):
-        return u'{}'.format(self.pk)
+        return u'{}'.format(self.text)
 
 
 class Answer(models.Model):
@@ -66,8 +73,11 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers')
     text = models.TextField()
 
+    def get_absolute_url(self):
+        return '/my_polls/poll/{}/'.format(self.question.poll.pk)
+
     def __unicode__(self):
-        return u'{}'.format(self.pk)
+        return u'{}'.format(self.text)
 
 
 class UserAnswers(models.Model):

@@ -4,10 +4,11 @@ from django.http import JsonResponse
 
 from django.views.generic import (ListView, DetailView, CreateView,
                                   UpdateView, DeleteView)
+
 from rambler.forms import PollForm, QuestionForm, AnswerForm
+from rambler.helpers import get_context_mixin, STATUSES
 
 from rambler.models import Poll, UserAnswers, Question, Answer
-from rambler import helpers
 
 
 # Опросы
@@ -43,7 +44,7 @@ class TryPoll(PollDetailView):
                              answer_id=answer_id)
             ua.save()
 
-        return JsonResponse({'status': helpers.STATUSES['OK']})
+        return JsonResponse({'status': STATUSES['OK']})
 
 
 class UserPollListView(PollListView):
@@ -81,7 +82,11 @@ class PollDeleteView(DeleteView):
 
 
 # Вопросы
-class QuestionCreateView(CreateView):
+
+QuestionContextMixin = get_context_mixin(Poll)
+
+
+class QuestionCreateView(QuestionContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
     template_name = 'rambler/user_add_form.html'
@@ -90,15 +95,8 @@ class QuestionCreateView(CreateView):
         form.instance.poll = Poll.objects.get(pk=self.kwargs['pk'])
         return super(QuestionCreateView, self).form_valid(form)
 
-    # Добавляем в шаблон создания вопроса информацию о родительском опросе
-    def get_context_data(self, **kwargs):
-        context = super(QuestionCreateView, self).get_context_data(**kwargs)
-        poll = Poll.objects.get(pk=self.kwargs['pk'])
-        context['object'] = poll
-        return context
 
-
-class QuestionUpdateView(UpdateView):
+class QuestionUpdateView(QuestionContextMixin, UpdateView):
     model = Question
     fields = ['text', 'kind']
     template_name = 'rambler/user_add_form.html'
@@ -112,7 +110,10 @@ class QuestionDeleteView(DeleteView):
 
 
 # Ответы
-class AnswerCreateView(CreateView):
+AnswerContextMixin = get_context_mixin(Question)
+
+
+class AnswerCreateView(AnswerContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
     template_name = 'rambler/user_add_form.html'
@@ -121,15 +122,8 @@ class AnswerCreateView(CreateView):
         form.instance.question = Question.objects.get(pk=self.kwargs['q_pk'])
         return super(AnswerCreateView, self).form_valid(form)
 
-    # Добавляем в шаблон создания ответа информацию о родительском вопросе
-    def get_context_data(self, **kwargs):
-        context = super(AnswerCreateView, self).get_context_data(**kwargs)
-        question = Question.objects.get(pk=self.kwargs['q_pk'])
-        context['object'] = question
-        return context
 
-
-class AnswerUpdateView(UpdateView):
+class AnswerUpdateView(AnswerContextMixin, UpdateView):
     model = Answer
     fields = ['text']
     template_name = 'rambler/user_add_form.html'

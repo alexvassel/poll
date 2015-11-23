@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{{ poll.name }},
+        <a href="{% url "user_poll_edit" poll.pk %}">Редактировать</a>,
+        Поделиться ссылкой - {{ request.get_host }}{% url "try_poll" poll.slug %},
+        <form method="POST" action="{% url "user_poll_delete" poll.pk %}">
+            {% csrf_token %}
+            <input type="submit" value="Удалить"/>
+        </form>
+    </h2>
+    <ul class="list-group">
+        {% for question in poll.questions.all %}
+            <li class="list-group-item">
+                <a href="{% url "question_edit" poll.pk question.pk %}">{{ question.text }}</a>
+                <form method="POST" action="{% url "question_delete" question.poll.pk question.pk %}">
+                    {% csrf_token %}
+                    <input type="submit" value="Удалить"/>
+                </form>
+            </li>
+            <ul class="list-group">
+                {% for answer in question.answers.all %}
+                    <li class="list-group-item">
+                        <a href="{% url "answer_edit" poll.pk question.pk answer.pk %}">{{ answer.text }}</a>
+                        <form method="POST" action="{% url "answer_delete" answer.question.poll.pk answer.question.pk answer.pk %}">
+                            {% csrf_token %}
+                            <input type="submit" value="Удалить"/>
+                    </form>
+                    </li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'answer_add' question.poll.pk question.pk %}" class="btn btn-warning" role="button">Добавить ответ</a>
+            <br><br>
+        {% endfor %}
+    </ul>
+    <a href="{% url "question_add" poll.pk %}" class="btn btn-info" role="button">Добавить вопрос</a>
+{% endblock %}
