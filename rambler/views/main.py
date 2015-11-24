@@ -58,6 +58,7 @@ class PollFinishView(View):
         poll = Poll.objects.get(pk=poll_pk)
 
         # Опрос переходит из polls_in_progress в finished_polls
+        # TODO транзакция (любой реквест в джанге - транзакция)
         user.polls_in_progress.remove(poll)
         user.finished_polls.add(poll)
 
@@ -70,7 +71,7 @@ class PollListView(ListView):
     anonymous = False
 
     def get_queryset(self):
-        qs = Poll.objects.all().order_by('-weight', '-created__weight')
+        qs = Poll.objects.order_by('-weight', '-created__weight')
         if self.anonymous:
             return qs
         return qs.filter(created=self.request.user.polluser)
@@ -157,15 +158,22 @@ class AnswerDeleteView(DeleteView):
 
 # TODO доделать
 # Статистика
-class UserStat(ListView):
+class UserStatView(TemplateView):
     template_name = 'rambler/stat.html'
-    context_object_name = 'polls'
 
-    def get_queryset(self):
+    def get_context_data(self, **kwargs):
+        context = super(UserStatView, self).get_context_data(**kwargs)
         user = self.request.user.polluser
 
         # "Опросы по популярности от самого популярного до менее популярных"
         # Сверху опросы, пройденные большим количеством пользователей
-        data = (Poll.objects.filter(created=user).
-                annotate(cnt=Count('finished'))).values()
-        return data
+        context['popular_polls'] = (Poll.objects.filter(created=user).
+                                    annotate(cnt=Count('finished')).
+                                    order_by('-cnt'))
+
+        # Опросы по популярным ответам в процентном соотношении
+        # от большего к меньшому
+        context['polls_popular_by_answers'] = (Poll.objects.annotate
+                                               (cnt=Count('useranswers')).
+                                               order_by('-cnt'))
+        return context

@@ -7,20 +7,19 @@ from rambler.models import Poll, PollUser, Question, UserAnswers
 class StatView(TemplateView):
     """Статистика, видная админу"""
     template_name = 'rambler/administrator/stat.html'
-    context_object_name = 'polls'
 
     def get_context_data(self, **kwargs):
         context = super(StatView, self).get_context_data(**kwargs)
 
-        all_polls = Poll.objects.all().count()
-        all_users = PollUser.objects.all().count()
-        all_answers = UserAnswers.objects.all().count()
+        all_polls = Poll.objects.count()
+        all_users = PollUser.objects.count()
+        all_answers = UserAnswers.objects.count()
 
         # "Администратор видит сводную информацию
         # по общему кол-ву пользователей, опросам и ответам"
         context['all_polls'] = all_polls
         context['all_users'] = all_users
-        context['all_questions'] = Question.objects.all().count()
+        context['all_questions'] = Question.objects.count()
         context['all_answers'] = all_answers
 
         # Администратор видит информацию о:
@@ -35,9 +34,9 @@ class StatView(TemplateView):
                                            all_polls)
         # "Администратор видит статистику
         # по самым популярным пользователям и опросам"
-        context['popular_polls'] = (Poll.objects.all().annotate(
+        context['popular_polls'] = (Poll.objects.annotate(
                                     cnt=Count('finished')))
-        context['popular_users'] = (PollUser.objects.all().annotate(
+        context['popular_users'] = (PollUser.objects.annotate(
                                     cnt=Count('finished_polls')))
         return context
 

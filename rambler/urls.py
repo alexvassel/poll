@@ -58,7 +58,7 @@ urlpatterns = [
 
     # Статистика
     url(r'^statistics/polls/',
-        views.main.UserStat.as_view(), name='user_stat'),
+        views.main.UserStatView.as_view(), name='user_stat'),
 
 
     # Авторизация
