@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 
 from unidecode import unidecode
@@ -33,7 +34,7 @@ class Poll(models.Model):
     created = models.ForeignKey(PollUser, related_name='created_polls')
 
     def get_absolute_url(self):
-        return '/poll/{}/'.format(self.pk)
+        return reverse('user_poll_details', args=[str(self.pk)])
 
     # TODO только если создаем объект
     def save(self, *args, **kwargs):
@@ -64,7 +65,7 @@ class Question(models.Model):
         return True if self.kind == self.KIND_CHOICES[1][0] else False
 
     def get_absolute_url(self):
-        return '/poll/{}/'.format(self.poll.pk)
+        return reverse('user_poll_details', args=[str(self.poll.pk)])
 
     @property
     def popular_answers(self):
@@ -84,7 +85,7 @@ class Answer(models.Model):
     text = models.TextField()
 
     def get_absolute_url(self):
-        return '/poll/{}/'.format(self.question.poll.pk)
+        return reverse('user_poll_details', args=[str(self.question.poll.pk)])
 
     def __unicode__(self):
         return u'{}'.format(self.text)
