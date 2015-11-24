@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
-from rambler.models import Poll, PollUser, Question, UserAnswers
+from rambler.models import Poll, PollUser, Question, UserAnswer
 
 
 class StatView(TemplateView):
@@ -13,7 +13,7 @@ class StatView(TemplateView):
 
         all_polls = Poll.objects.count()
         all_users = PollUser.objects.count()
-        all_answers = UserAnswers.objects.count()
+        all_answers = UserAnswer.objects.count()
 
         # "Администратор видит сводную информацию
         # по общему кол-ву пользователей, опросам и ответам"
@@ -27,11 +27,11 @@ class StatView(TemplateView):
         #  среднем ответов приходится на пользователя
         #  среднем ответов приходиться на опрос
         context['average_poll_user'] = (float(all_polls) /
-                                        all_users)
+                                        all_users) if all_users else 0
         context['average_answers_user'] = (float(all_answers) /
-                                           all_users)
+                                           all_users) if all_users else 0
         context['average_answers_poll'] = (float(all_answers) /
-                                           all_polls)
+                                           all_polls) if all_polls else 0
         # "Администратор видит статистику
         # по самым популярным пользователям и опросам"
         context['popular_polls'] = (Poll.objects.annotate(

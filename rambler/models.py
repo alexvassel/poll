@@ -58,7 +58,7 @@ class Question(models.Model):
     def answered(self, user):
         """Проверка на то, что данный пользователь уже ответил на вопрос
         """
-        return UserAnswers.objects.filter(user=user.polluser, question=self)
+        return UserAnswer.objects.filter(user=user.polluser, question=self)
 
     def is_multiple(self):
         return True if self.kind == self.KIND_CHOICES[1][0] else False
@@ -92,8 +92,6 @@ class Answer(models.Model):
 
 class UserAnswer(models.Model):
     """"Ответы конкретного пользователя"""
-    poll = models.ForeignKey(Poll)
-    question = models.ForeignKey(Question)
     answer = models.ForeignKey(Answer)
     user = models.ForeignKey(PollUser)
 

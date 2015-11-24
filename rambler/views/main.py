@@ -9,7 +9,7 @@ from django.views.generic import (ListView, DetailView, CreateView,
 from rambler.forms import PollForm, QuestionForm, AnswerForm
 from rambler.helpers import get_context_mixin, STATUSES
 
-from rambler.models import Poll, UserAnswers, Question, Answer
+from rambler.models import Poll, UserAnswer, Question, Answer
 
 
 # Опросы
@@ -42,7 +42,7 @@ class PollTryView(PollDetailView):
                        else [answers_ids])
 
         for answer_id in answers_ids:
-            ua = UserAnswers(user=request.user.polluser,
+            ua = UserAnswer(user=request.user.polluser,
                              poll=self.get_object(), question_id=question_id,
                              answer_id=answer_id)
             ua.save()
@@ -174,6 +174,6 @@ class UserStatView(TemplateView):
         # Опросы по популярным ответам в процентном соотношении
         # от большего к меньшому
         context['polls_popular_by_answers'] = (Poll.objects.annotate
-                                               (cnt=Count('useranswers')).
+                                               (cnt=Count('questions__answers__useranswer')).
                                                order_by('-cnt'))
         return context
