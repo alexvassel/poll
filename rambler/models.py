@@ -90,7 +90,7 @@ class Answer(models.Model):
         return u'{}'.format(self.text)
 
 
-class UserAnswers(models.Model):
+class UserAnswer(models.Model):
     """"Ответы конкретного пользователя"""
     poll = models.ForeignKey(Poll)
     question = models.ForeignKey(Question)
