@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db.models import Count
 
 from unidecode import unidecode
 
@@ -15,6 +16,9 @@ class PollUser(models.Model):
                                                related_name='in_progress')
     finished_polls = models.ManyToManyField('Poll', blank=True, null=True,
                                             related_name='finished')
+
+    def get_absolute_url(self):
+        return '/administrator/user/{}/edit/'.format(self.pk)
 
     def __unicode__(self):
         return u'{}'.format(self.user.username)
@@ -61,6 +65,14 @@ class Question(models.Model):
 
     def get_absolute_url(self):
         return '/poll/{}/'.format(self.poll.pk)
+
+    @property
+    def popular_answers(self):
+        """Опросы по популярным ответам в процентном соотношении
+        от большего к меньшому"""
+        answers = self.answers.all()
+        popular = answers.annotate(cnt=Count('useranswers')).order_by('-cnt')
+        return popular
 
     def __unicode__(self):
         return u'{}'.format(self.text)

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Пользователи</h2>
+
+    <table class="table">
+        <tr>
+            <th>Имя</th>
+            <th>Вес</th>
+        </tr>
+        {% for polluser in users %}
+            <tr>
+                <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.user.username }}</a></td>
+                <td>{{ polluser.weight }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

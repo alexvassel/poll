@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from django.db.models import Count
 
 from django.http import JsonResponse
 
 from django.views.generic import (ListView, DetailView, CreateView,
-                                  UpdateView, DeleteView, View)
+                                  UpdateView, DeleteView, View, TemplateView)
 
 from rambler.forms import PollForm, QuestionForm, AnswerForm
 from rambler.helpers import get_context_mixin, STATUSES
@@ -22,18 +23,17 @@ class PollTryView(PollDetailView):
     """Вывод шаблона для прохождения опроса,
     а также сохранение ответа на вопрос
     """
-    template_name = 'rambler/try_poll.html'
+    template_name = 'rambler/try-poll.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(PollTryView, self).get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
         # Сохраняем текущий опрос как начатый пользователем
         user = self.request.user.polluser
         poll = self.get_object()
         user.polls_in_progress.add(poll)
-        return context
+        return super(PollTryView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kw):
-        """Записываем ответ пользоватля"""
+        """Записываем ответ пользователя"""
         question_id = request.POST.get('question_id')
         answers_ids = (request.POST.getlist('answers_ids[]') or
                        request.POST.get('answers_ids'))
@@ -70,7 +70,7 @@ class PollListView(ListView):
     anonymous = False
 
     def get_queryset(self):
-        qs = Poll.objects.all()
+        qs = Poll.objects.all().order_by('-weight', '-created__weight')
         if self.anonymous:
             return qs
         return qs.filter(created=self.request.user.polluser)
@@ -79,7 +79,7 @@ class PollListView(ListView):
 class PollCreateView(CreateView):
     model = Poll
     form_class = PollForm
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
     def form_valid(self, form):
         form.instance.created = self.request.user.polluser
@@ -89,7 +89,7 @@ class PollCreateView(CreateView):
 class PollUpdateView(UpdateView):
     model = Poll
     fields = ['name', 'weight']
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
 
 class PollDeleteView(DeleteView):
@@ -107,7 +107,7 @@ QuestionContextMixin = get_context_mixin(Poll)
 class QuestionCreateView(QuestionContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
     def form_valid(self, form):
         form.instance.poll = Poll.objects.get(pk=self.kwargs['top_object_pk'])
@@ -117,7 +117,7 @@ class QuestionCreateView(QuestionContextMixin, CreateView):
 class QuestionUpdateView(QuestionContextMixin, UpdateView):
     model = Question
     fields = ['text', 'kind']
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
 
 class QuestionDeleteView(DeleteView):
@@ -134,7 +134,7 @@ AnswerContextMixin = get_context_mixin(Question)
 class AnswerCreateView(AnswerContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
     def form_valid(self, form):
         form.instance.question = (Question.objects.
@@ -145,7 +145,7 @@ class AnswerCreateView(AnswerContextMixin, CreateView):
 class AnswerUpdateView(AnswerContextMixin, UpdateView):
     model = Answer
     fields = ['text']
-    template_name = 'rambler/add_form.html'
+    template_name = 'rambler/form.html'
 
 
 class AnswerDeleteView(DeleteView):
@@ -153,3 +153,19 @@ class AnswerDeleteView(DeleteView):
 
     def get_success_url(self):
         return '/poll/{0}/'.format(self.object.question.poll.pk)
+
+
+# TODO доделать
+# Статистика
+class UserStat(ListView):
+    template_name = 'rambler/stat.html'
+    context_object_name = 'polls'
+
+    def get_queryset(self):
+        user = self.request.user.polluser
+
+        # "Опросы по популярности от самого популярного до менее популярных"
+        # Сверху опросы, пройденные большим количеством пользователей
+        data = (Poll.objects.filter(created=user).
+                annotate(cnt=Count('finished'))).values()
+        return data

@@ -38,7 +38,7 @@
                                 <input type="submit" value="Удалить ответ" class="btn btn-danger btn-xs"/>
                             </form>
                             <br>
-                            <a href="{% url "answer_edit" answer.question.poll.pk question.pk answer.pk %} %}" class="btn btn-info btn-xs" role="button">Редактировать</a>
+                            <a href="{% url "answer_edit" answer.question.poll.pk question.pk answer.pk %}" class="btn btn-info btn-xs" role="button">Редактировать</a>
                         {% endif %}
                     </li>
                 {% endfor %}

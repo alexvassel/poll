@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Общая статистика</h3>
+    <table class="table">
+        <tr>
+            <td>Всего пользователей</td>
+            <td>{{ all_users }}</td>
+        </tr>
+        <tr>
+            <td>Всего опросов</td>
+            <td>{{ all_polls }}</td>
+        </tr>
+        <tr>
+            <td>Всего вопросов</td>
+            <td>{{ all_questions }}</td>
+        </tr>
+        <tr>
+            <td>Всего ответов</td>
+            <td>{{ all_answers }}</td>
+        </tr>
+        <tr>
+            <td>В среднем опросов на пользователя</td>
+            <td>{{ average_poll_user }}</td>
+        </tr>
+        <tr>
+            <td>В среднем ответов на пользователя</td>
+            <td>{{ average_answers_user }}</td>
+        </tr>
+        <tr>
+            <td>В среднем ответов на опрос</td>
+            <td>{{ average_answers_poll }}</td>
+        </tr>
+    </table>
+
+    <h3>Популярные опросы</h3>
+
+    <table class="table">
+        <tr>
+            <th>Имя</th>
+            <th>Пройден раз</th>
+        </tr>
+        {% for poll in popular_polls %}
+            <tr>
+                <td>{{ poll.name }}</td>
+                <td>{{ poll.cnt }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Популярные пользователи</h3>
+    <table class="table">
+        <tr>
+            <th>Имя</th>
+            <th>Пройдено опросов</th>
+        </tr>
+        {% for user in popular_users %}
+            <tr>
+                <td>{{ user.user.username }}</td>
+                <td>{{ user.cnt }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

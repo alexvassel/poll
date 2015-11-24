@@ -5,7 +5,7 @@ from django.contrib import admin
 
 import views.auth
 import views.main
-import views.stat
+import views.admin
 
 urlpatterns = [
     # Админка
@@ -18,7 +18,7 @@ urlpatterns = [
         name='poll_details'),
     url(r'^poll/(?P<slug>[\w-]+)/try/$', views.main.PollTryView.as_view(),
         name='try_poll'),
-    # TODO передать параметр
+
     url(r'^$', views.main.PollListView.as_view(anonymous=True), name='index'),
 
     # Ответы
@@ -58,9 +58,7 @@ urlpatterns = [
 
     # Статистика
     url(r'^statistics/polls/',
-        views.stat.PollsPopularView.as_view(), name='user_poll_stat'),
-    url(r'^statistics/questions/',
-        views.stat.QuestionsPopularView.as_view(), name='user_questions_stat'),
+        views.main.UserStat.as_view(), name='user_stat'),
 
 
     # Авторизация
@@ -68,4 +66,12 @@ urlpatterns = [
     url(r'^registration/logout/$', 'django.contrib.auth.views.logout',
         {'next_page': '/'}),
     url(r'^registration/register/$', views.auth.register, name='registration'),
+
+    # Админитратор
+    url(r'^administrator/user/(?P<pk>\d+)/edit/',
+        views.admin.UserDetailView.as_view(), name='admin_user'),
+    url(r'^administrator/stat/', views.admin.StatView.as_view(),
+        name='admin_stat'),
+    url(r'^administrator/users/', views.admin.UsersView.as_view(),
+        name='admin_users'),
 ]
