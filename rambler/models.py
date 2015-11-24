@@ -29,9 +29,11 @@ class Poll(models.Model):
     """
     """
     name = models.CharField(max_length=30, verbose_name=u'Имя')
-    slug = models.SlugField(unique=True, max_length=30)
-    weight = models.PositiveSmallIntegerField(verbose_name='Вес')
-    created = models.ForeignKey(PollUser, related_name='created_polls')
+    slug = models.SlugField(unique=True, max_length=30, db_index=True)
+    weight = models.PositiveSmallIntegerField(verbose_name='Вес',
+                                              db_index=True)
+    created = models.ForeignKey(PollUser, related_name='created_polls',
+                                db_index=True)
 
     def get_absolute_url(self):
         return reverse('user_poll_details', args=[str(self.pk)])
