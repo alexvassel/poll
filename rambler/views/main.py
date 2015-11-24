@@ -7,7 +7,7 @@ from django.views.generic import (ListView, DetailView, CreateView,
                                   UpdateView, DeleteView, View, TemplateView)
 
 from rambler.forms import PollForm, QuestionForm, AnswerForm
-from rambler.helpers import get_context_mixin, STATUSES
+from rambler.helpers import STATUSES, UpdateContextMixin
 
 from rambler.models import Poll, UserAnswer, Question, Answer
 
@@ -102,21 +102,20 @@ class PollDeleteView(DeleteView):
 
 # Вопросы
 
-QuestionContextMixin = get_context_mixin(Poll)
-
-
-class QuestionCreateView(QuestionContextMixin, CreateView):
+class QuestionCreateView(UpdateContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
     template_name = 'rambler/form.html'
+    top_model = Poll
 
     def form_valid(self, form):
         form.instance.poll = Poll.objects.get(pk=self.kwargs['top_object_pk'])
         return super(QuestionCreateView, self).form_valid(form)
 
 
-class QuestionUpdateView(QuestionContextMixin, UpdateView):
+class QuestionUpdateView(UpdateContextMixin, UpdateView):
     model = Question
+    top_model = Poll
     fields = ['text', 'kind']
     template_name = 'rambler/form.html'
 
@@ -129,13 +128,11 @@ class QuestionDeleteView(DeleteView):
 
 
 # Ответы
-AnswerContextMixin = get_context_mixin(Question)
-
-
-class AnswerCreateView(AnswerContextMixin, CreateView):
+class AnswerCreateView(UpdateContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
     template_name = 'rambler/form.html'
+    top_model = Question
 
     def form_valid(self, form):
         form.instance.question = (Question.objects.
@@ -143,10 +140,11 @@ class AnswerCreateView(AnswerContextMixin, CreateView):
         return super(AnswerCreateView, self).form_valid(form)
 
 
-class AnswerUpdateView(AnswerContextMixin, UpdateView):
+class AnswerUpdateView(UpdateContextMixin, UpdateView):
     model = Answer
     fields = ['text']
     template_name = 'rambler/form.html'
+    top_model = Question
 
 
 class AnswerDeleteView(DeleteView):
