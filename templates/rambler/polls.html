@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Опросы</h2>
+    <ul>
+        {% for poll in polls %}
+            <li>
+                <a href="{{ poll.get_absolute_url }}">
+                    {{ poll.name }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    {% if user.is_authenticated %}
+        <a href="{% url 'user_poll_add' %}" class="btn btn-info" role="button">Создать опрос</a>
+    {% endif %}
+{% endblock %}

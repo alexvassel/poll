@@ -12,18 +12,10 @@ from rambler.models import Poll, UserAnswers, Question, Answer
 
 
 # Опросы
-class PollListView(ListView):
-    template_name = 'rambler/index.html'
-    context_object_name = 'polls'
-
-    def get_queryset(self):
-        return Poll.objects.all().order_by('-weight', '-created__weight')
-
-
 class PollDetailView(DetailView):
     model = Poll
     context_object_name = 'poll'
-    template_name = 'rambler/poll_details.html'
+    template_name = 'rambler/single-poll.html'
 
 
 class PollTryView(PollDetailView):
@@ -72,21 +64,22 @@ class PollFinishView(View):
         return JsonResponse({'status': STATUSES['OK']})
 
 
-class UserPollListView(PollListView):
-    template_name = 'rambler/user_polls.html'
+class PollListView(ListView):
+    template_name = 'rambler/polls.html'
+    context_object_name = 'polls'
+    anonymous = False
 
     def get_queryset(self):
-        return Poll.objects.filter(created=self.request.user.polluser)
-
-
-class UserPollDetailView(PollDetailView):
-    template_name = 'rambler/user_poll_details.html'
+        qs = Poll.objects.all()
+        if self.anonymous:
+            return qs
+        return qs.filter(created=self.request.user.polluser)
 
 
 class PollCreateView(CreateView):
     model = Poll
     form_class = PollForm
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
     def form_valid(self, form):
         form.instance.created = self.request.user.polluser
@@ -96,14 +89,14 @@ class PollCreateView(CreateView):
 class PollUpdateView(UpdateView):
     model = Poll
     fields = ['name', 'weight']
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
 
 class PollDeleteView(DeleteView):
     model = Poll
 
     def get_success_url(self):
-        return '/{0}/polls/'.format(self.object.created.user.username)
+        return '/polls/'.format(self.object.pk)
 
 
 # Вопросы
@@ -114,7 +107,7 @@ QuestionContextMixin = get_context_mixin(Poll)
 class QuestionCreateView(QuestionContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
     def form_valid(self, form):
         form.instance.poll = Poll.objects.get(pk=self.kwargs['top_object_pk'])
@@ -124,15 +117,14 @@ class QuestionCreateView(QuestionContextMixin, CreateView):
 class QuestionUpdateView(QuestionContextMixin, UpdateView):
     model = Question
     fields = ['text', 'kind']
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
 
 class QuestionDeleteView(DeleteView):
     model = Question
 
     def get_success_url(self):
-        return '/{0}/poll/{1}/'.format(self.object.poll.created.user.username,
-                                       self.object.poll.pk)
+        return '/poll/{0}/'.format(self.object.poll.pk)
 
 
 # Ответы
@@ -142,7 +134,7 @@ AnswerContextMixin = get_context_mixin(Question)
 class AnswerCreateView(AnswerContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
     def form_valid(self, form):
         form.instance.question = (Question.objects.
@@ -153,13 +145,11 @@ class AnswerCreateView(AnswerContextMixin, CreateView):
 class AnswerUpdateView(AnswerContextMixin, UpdateView):
     model = Answer
     fields = ['text']
-    template_name = 'rambler/user_add_form.html'
+    template_name = 'rambler/add_form.html'
 
 
 class AnswerDeleteView(DeleteView):
     model = Answer
 
     def get_success_url(self):
-        return '/{0}/poll/{1}/'.format(self.object.question.poll.
-                                       created.user.username,
-                                       self.object.question.poll.pk)
+        return '/poll/{0}/'.format(self.object.question.poll.pk)
