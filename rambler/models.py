@@ -98,6 +98,12 @@ class UserAnswer(models.Model):
     answer = models.ForeignKey(Answer)
     user = models.ForeignKey(PollUser)
 
+    # Денормализация умышлена
+
+    # позволяет избежать допзапроса при определении того,
+    # отвечал ли пользователь на данный вопрос (Question.answered)
+    question = models.ForeignKey(Question)
+
     # TODO метод создания инстанса
     def __unicode__(self):
         return u'{}'.format(self.pk)

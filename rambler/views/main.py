@@ -40,11 +40,9 @@ class PollTryView(PollDetailView):
 
         answers_ids = (answers_ids if isinstance(answers_ids, list)
                        else [answers_ids])
-
         for answer_id in answers_ids:
             ua = UserAnswer(user=request.user.polluser,
-                             poll=self.get_object(), question_id=question_id,
-                             answer_id=answer_id)
+                            question_id=question_id, aswer_id=answer_id)
             ua.save()
 
         return JsonResponse({'status': STATUSES['OK']})
