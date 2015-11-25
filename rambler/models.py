@@ -4,14 +4,15 @@ from django.db.models import Count
 
 from unidecode import unidecode
 
-from django.contrib.auth.models import User, AbstractUser
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.template.defaultfilters import slugify
 
 
 class PollUser(AbstractUser):
     """Своя модель пользователя"""
-    weight = models.PositiveSmallIntegerField(blank=True, null=True)
+    weight = models.PositiveSmallIntegerField(blank=True, null=True,
+                                              verbose_name=u'Вес')
     polls_in_progress = models.ManyToManyField('Poll', blank=True, null=True,
                                                related_name='in_progress')
     finished_polls = models.ManyToManyField('Poll', blank=True, null=True,
@@ -54,8 +55,9 @@ class Question(models.Model):
         ('m', u'Несолько ответов'),
     )
     poll = models.ForeignKey(Poll, related_name='questions')
-    text = models.TextField()
-    kind = models.CharField(max_length=1, choices=KIND_CHOICES)
+    text = models.TextField(verbose_name=u'Текст вопроса')
+    kind = models.CharField(max_length=1, choices=KIND_CHOICES,
+                            verbose_name=u'Тип вопроса')
 
     POPULAR_ANSWERS_COUNT = 3
 
@@ -90,7 +92,7 @@ class Question(models.Model):
 class Answer(models.Model):
     """"""
     question = models.ForeignKey(Question, related_name='answers')
-    text = models.TextField()
+    text = models.TextField(verbose_name=u'Текст ответа')
 
     def get_absolute_url(self):
         return reverse('user_poll_details', args=[str(self.question.poll.pk)])

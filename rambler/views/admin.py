@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from decimal import Decimal, getcontext
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
+from rambler.forms import UserForm
 from rambler.models import Poll, PollUser, Question, UserAnswer
 from rambler.views.auth import IsSuperuserMixin
 
@@ -12,6 +14,9 @@ class StatView(IsSuperuserMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StatView, self).get_context_data(**kwargs)
+
+        # Количество цифр в Decimal
+        getcontext().prec = 3
 
         all_polls = Poll.objects.count()
         all_users = PollUser.objects.count()
@@ -28,11 +33,11 @@ class StatView(IsSuperuserMixin, TemplateView):
         #  среднем опросов приходится на пользователя
         #  среднем ответов приходится на пользователя
         #  среднем ответов приходиться на опрос
-        context['average_poll_user'] = (float(all_polls) /
+        context['average_poll_user'] = (Decimal(all_polls) /
                                         all_users) if all_users else 0
-        context['average_answers_user'] = (float(all_answers) /
+        context['average_answers_user'] = (Decimal(all_answers) /
                                            all_users) if all_users else 0
-        context['average_answers_poll'] = (float(all_answers) /
+        context['average_answers_poll'] = (Decimal(all_answers) /
                                            all_polls) if all_polls else 0
         context['popular_users'] = (PollUser.objects.annotate(
                                     cnt=Count('finished_polls')))
@@ -43,7 +48,7 @@ class PopularPollsView(IsSuperuserMixin, ListView):
     template_name = 'rambler/administrator/popular_polls_list.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 1
+    POLLS_PER_PAGE = 10
 
     # "Администратор видит статистику
     # по самым популярным пользователям и опросам"
@@ -63,7 +68,7 @@ class PopularUsersView(IsSuperuserMixin, ListView):
     template_name = 'rambler/administrator/popular_users_list.html'
     context_object_name = 'instances'
 
-    USERS_PER_PAGE = 1
+    USERS_PER_PAGE = 10
 
     # "Администратор видит статистику
     # по самым популярным пользователям и опросам"
@@ -102,7 +107,7 @@ class UserDetailView(IsSuperuserMixin, UpdateView):
     """Редактирование пользователя"""
     model = PollUser
     template_name = 'rambler/form.html'
-    fields = ['weight']
+    form_class = UserForm
     success_url = '/administrator/users/'
 
     def get_context_data(self, **kwargs):

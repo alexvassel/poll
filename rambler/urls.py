@@ -2,6 +2,7 @@
 
 from django.conf.urls import include, url
 from django.contrib import admin
+from rambler.forms import LoginForm
 
 import views.auth
 import views.main
@@ -65,7 +66,8 @@ urlpatterns = [
 
 
     # Авторизация
-    url(r'^registration/login/$', 'django.contrib.auth.views.login'),
+    url(r'^registration/login/$', 'django.contrib.auth.views.login',
+        {'authentication_form': LoginForm}),
     url(r'^registration/logout/$', 'django.contrib.auth.views.logout',
         {'next_page': '/'}),
     url(r'^registration/register/$', views.auth.register, name='registration'),

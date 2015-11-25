@@ -2,11 +2,11 @@
 {% block title %}Register{% endblock %}
 {% block content %}
 
-  <h2>Registration</h2>
+  <h2>Регистрация</h2>
 
-  <form action="/registration/register/" method="post">{% csrf_token %}
+  <form action="{% url 'registration' %}" method="POST">{% csrf_token %}
     {{form.as_p}}
-    <input type="submit" value="Register" />
+    <input type="submit" value="Зарегистрироваться" class="btn btn-info" />
   </form>
 
 {% endblock %}

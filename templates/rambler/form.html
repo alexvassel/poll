@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {{ upper_object }}
+    <h3>{{ upper_object }}</h3>
     <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
-    <input type="submit" value="Create" />
+    <input type="submit" class="btn btn-info" value="Сохранить" />
 </form>
 {% endblock %}

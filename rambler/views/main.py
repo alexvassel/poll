@@ -103,8 +103,8 @@ class PollCreateView(LoggedInMixin, CreateView):
 
 class PollUpdateView(LoggedInMixin, UpdateView):
     model = Poll
-    fields = ['name', 'weight']
     template_name = 'rambler/form.html'
+    form_class = PollForm
 
 
 class PollDeleteView(LoggedInMixin, DeleteView):
@@ -130,7 +130,7 @@ class QuestionCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
 class QuestionUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Question
     top_model = Poll
-    fields = ['text', 'kind']
+    form_class = QuestionForm
     template_name = 'rambler/form.html'
 
 
@@ -156,7 +156,7 @@ class AnswerCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
 
 class AnswerUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Answer
-    fields = ['text']
+    form_class = AnswerForm
     template_name = 'rambler/form.html'
     top_model = Question
 
