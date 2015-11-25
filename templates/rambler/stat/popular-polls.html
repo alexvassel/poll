@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Популярные опросы</h3>
+
+    <table class="table">
+        <tr>
+            <th>Имя</th>
+            <th>Пройден раз</th>
+        </tr>
+        {% for poll in instances %}
+            <tr>
+                <td>{{ poll.name }}</td>
+                <td>{{ poll.cnt }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    {% include "rambler/common/paginator.html" with instances=instances %}
+{% endblock %}

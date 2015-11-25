@@ -8,11 +8,12 @@
             <th>Имя</th>
             <th>Вес</th>
         </tr>
-        {% for polluser in users %}
+        {% for polluser in instances %}
             <tr>
                 <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.username }}</a></td>
                 <td>{{ polluser.weight }}</td>
             </tr>
         {% endfor %}
     </table>
+    {% include "rambler/common/paginator.html" with instances=instances %}
 {% endblock %}

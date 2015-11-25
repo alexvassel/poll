@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.db import transaction
 from django.db.models import Count
+from django.core.paginator import Paginator
 
 from django.http import JsonResponse
 
 from django.views.generic import (ListView, DetailView, CreateView,
-                                  UpdateView, DeleteView, View, TemplateView)
+                                  UpdateView, DeleteView, View)
 
 from rambler.forms import PollForm, QuestionForm, AnswerForm
 from rambler.helpers import STATUSES, UpdateContextMixin
@@ -68,14 +69,23 @@ class PollFinishView(View):
 
 class PollListView(ListView):
     template_name = 'rambler/polls.html'
-    context_object_name = 'polls'
+    context_object_name = 'instances'
     anonymous = False
+    POLLS_PER_PAGE = 1
 
     def get_queryset(self):
         qs = Poll.objects.order_by('-weight', '-created__weight')
-        if self.anonymous:
-            return qs
-        return qs.filter(created=self.request.user)
+
+        if not self.anonymous:
+            qs = qs.filter(created=self.request.user)
+
+        paginator = Paginator(qs, self.POLLS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        polls = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return polls
 
 
 class PollCreateView(CreateView):
@@ -155,25 +165,47 @@ class AnswerDeleteView(DeleteView):
         return '/poll/{0}/'.format(self.object.question.poll.pk)
 
 
-# TODO доделать
 # Статистика
-class UserStatView(TemplateView):
-    template_name = 'rambler/stat.html'
+class PopularPollsView(ListView):
+    template_name = 'rambler/stat/popular-polls.html'
+    context_object_name = 'instances'
 
-    def get_context_data(self, **kwargs):
-        context = super(UserStatView, self).get_context_data(**kwargs)
-        user = self.request.user
+    POLLS_PER_PAGE = 1
 
+    def get_queryset(self):
         # "Опросы по популярности от самого популярного до менее популярных"
         # Сверху опросы, пройденные большим количеством пользователей
-        context['popular_polls'] = (Poll.objects.filter(created=user).
-                                    annotate(cnt=Count('finished')).
-                                    order_by('-cnt'))
+        qs = (Poll.objects.filter(created=self.request.user).
+              annotate(cnt=Count('finished')).order_by('-cnt'))
 
-        # Опросы по популярным ответам в процентном соотношении
-        # от большего к меньшому
-        context['polls_popular_by_answers'] = (Poll.objects.annotate
-                                               (cnt=Count
-                                               ('questions__answers__useranswer')).
-                                               order_by('-cnt'))
-        return context
+        paginator = Paginator(qs, self.POLLS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        polls = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return polls
+
+
+# Статистика
+class PopularAnswersView(ListView):
+    """"Опросы по популярным ответам в процентном соотношении
+        от большего к меньшому"""
+
+    template_name = 'rambler/stat/popular-answers.html'
+    context_object_name = 'instances'
+
+    POLLS_PER_PAGE = 1
+
+    def get_queryset(self):
+        # "Опросы по популярности от самого популярного до менее популярных"
+        # Сверху опросы, пройденные большим количеством пользователей
+        qs = Poll.objects.filter(created=self.request.user)
+
+        paginator = Paginator(qs, self.POLLS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        polls = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return polls

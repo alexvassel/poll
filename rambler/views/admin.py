@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
 from rambler.models import Poll, PollUser, Question, UserAnswer
@@ -6,7 +7,7 @@ from rambler.models import Poll, PollUser, Question, UserAnswer
 
 class StatView(TemplateView):
     """Статистика, видная админу"""
-    template_name = 'rambler/administrator/stat.html'
+    template_name = 'rambler/administrator/common_stat.html'
 
     def get_context_data(self, **kwargs):
         context = super(StatView, self).get_context_data(**kwargs)
@@ -32,23 +33,68 @@ class StatView(TemplateView):
                                            all_users) if all_users else 0
         context['average_answers_poll'] = (float(all_answers) /
                                            all_polls) if all_polls else 0
-        # "Администратор видит статистику
-        # по самым популярным пользователям и опросам"
-        context['popular_polls'] = (Poll.objects.annotate(
-                                    cnt=Count('finished')))
         context['popular_users'] = (PollUser.objects.annotate(
                                     cnt=Count('finished_polls')))
         return context
 
 
+class PopularPollsView(ListView):
+    template_name = 'rambler/administrator/popular_polls_list.html'
+    context_object_name = 'instances'
+
+    POLLS_PER_PAGE = 1
+
+    # "Администратор видит статистику
+    # по самым популярным пользователям и опросам"
+    def get_queryset(self):
+        qs = Poll.objects.annotate(cnt=Count('finished'))
+
+        paginator = Paginator(qs, self.POLLS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        polls = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return polls
+
+
+class PopularUsersView(ListView):
+    template_name = 'rambler/administrator/popular_users_list.html'
+    context_object_name = 'instances'
+
+    USERS_PER_PAGE = 1
+
+    # "Администратор видит статистику
+    # по самым популярным пользователям и опросам"
+    def get_queryset(self):
+        qs = PollUser.objects.annotate(cnt=Count('finished_polls'))
+
+        paginator = Paginator(qs, self.USERS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        polls = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return polls
+
+
 class UsersView(ListView):
     """Все пользователи"""
-    template_name = 'rambler/administrator/users.html'
-    context_object_name = 'users'
-    anonymous = False
+    template_name = 'rambler/administrator/users_list.html'
+    context_object_name = 'instances'
+
+    USERS_PER_PAGE = 1
 
     def get_queryset(self):
-        return PollUser.objects.all()
+        qs = PollUser.objects.all()
+
+        paginator = Paginator(qs, self.USERS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        users = (paginator.page(page) if page and page.isdigit()
+                 else paginator.page(1))
+
+        return users
 
 
 class UserDetailView(UpdateView):

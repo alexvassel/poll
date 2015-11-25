@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h3>Популярные ответы</h3>
+
+    {% for poll in instances %}
+        <h4>Опрос - <b>{{ poll.name }}</b></h4>
+        {% for question in poll.questions.all %}
+            <h5>Вопрос - <b>{{ question.text }}</b></h5>
+                <table class="table">
+                    <tr>
+                        <th>Текст ответа</th>
+                        <th>Популярность</th>
+                    </tr>
+                    {% for answer in question.popular_answers %}
+                        <tr>
+                            <td>{{ answer.text }}</td>
+                            <td>
+                                {% if answer.percent == None %}
+                                    Нет ответов
+                                {% else %}
+                                    {{ answer.percent }} %
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+        {% endfor %}
+
+    {% endfor %}
+
+    {% include "rambler/common/paginator.html" with instances=instances %}
+{% endblock %}

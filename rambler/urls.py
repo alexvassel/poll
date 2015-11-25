@@ -58,7 +58,10 @@ urlpatterns = [
 
     # Статистика
     url(r'^statistics/polls/',
-        views.main.UserStatView.as_view(), name='user_stat'),
+        views.main.PopularPollsView.as_view(), name='user_popular_polls_stat'),
+    url(r'^statistics/answers/',
+        views.main.PopularAnswersView.as_view(),
+        name='user_popular_answers_stat'),
 
 
     # Авторизация
@@ -72,6 +75,10 @@ urlpatterns = [
         views.admin.UserDetailView.as_view(), name='admin_user'),
     url(r'^administrator/stat/', views.admin.StatView.as_view(),
         name='admin_stat'),
+    url(r'^administrator/popular_polls/',
+        views.admin.PopularPollsView.as_view(), name='admin_popular_polls'),
+    url(r'^administrator/popular_users/',
+        views.admin.PopularUsersView.as_view(), name='admin_popular_users'),
     url(r'^administrator/users/', views.admin.UsersView.as_view(),
         name='admin_users'),
 ]

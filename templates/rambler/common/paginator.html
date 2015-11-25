@@ -1,0 +1,18 @@
+{% if instances.object_list %}
+    <br>
+    <div class="pagination">
+        <span class="step-links">
+            {% if instances.has_previous %}
+                <a href="?page={{ instances.previous_page_number }}">Назад</a>
+            {% endif %}
+
+            <span class="current">
+                Страница {{ instances.number }} из {{ instances.paginator.num_pages }}
+            </span>
+
+            {% if instances.has_next %}
+                <a href="?page={{ instances.next_page_number }}">Вперед</a>
+            {% endif %}
+        </span>
+    </div>
+{% endif %}

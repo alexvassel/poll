@@ -32,33 +32,4 @@
             <td>{{ average_answers_poll }}</td>
         </tr>
     </table>
-
-    <h3>Популярные опросы</h3>
-
-    <table class="table">
-        <tr>
-            <th>Имя</th>
-            <th>Пройден раз</th>
-        </tr>
-        {% for poll in popular_polls %}
-            <tr>
-                <td>{{ poll.name }}</td>
-                <td>{{ poll.cnt }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    <h3>Популярные пользователи</h3>
-    <table class="table">
-        <tr>
-            <th>Имя</th>
-            <th>Пройдено опросов</th>
-        </tr>
-        {% for user in popular_users %}
-            <tr>
-                <td>{{ user.user.username }}</td>
-                <td>{{ user.cnt }}</td>
-            </tr>
-        {% endfor %}
-    </table>
 {% endblock %}

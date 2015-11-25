@@ -34,7 +34,11 @@
                   <li>
                     <a href="{% url 'user_polls' %}">Мои опросы</a></li>
                   <li>
-                    <a href="{% url 'user_stat' %}">Моя статистика <span class="caret"></span></a>
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Моя статистика <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                      <li><a href="{% url 'user_popular_polls_stat' %}">Популярные вопросы</a></li>
+                      <li><a href="{% url 'user_popular_answers_stat' %}">Ответы на опросы</a></li>
+                    </ul>
                   </li>
                 {% endif %}
               </ul>
@@ -43,8 +47,10 @@
                   <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Администратор <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url 'admin_stat' %}">Статистика</a></li>
-                      <li><a href="{% url 'admin_users' %}">Пользователи</a></li>
+                      <li><a href="{% url 'admin_stat' %}">Общая статистика</a></li>
+                      <li><a href="{% url 'admin_popular_polls' %}">Популярные опросы</a></li>
+                      <li><a href="{% url 'admin_popular_users' %}">Популярные пользователи</a></li>
+                      <li><a href="{% url 'admin_users' %}">Управление пользователями</a></li>
                     </ul>
                   </li>
                 {% if user.is_anonymous %}

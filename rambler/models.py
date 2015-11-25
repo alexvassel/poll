@@ -10,7 +10,7 @@ from django.template.defaultfilters import slugify
 
 
 class PollUser(AbstractUser):
-    """Расширение стандартной модели User"""
+    """Своя модель пользователя"""
     weight = models.PositiveSmallIntegerField(blank=True, null=True)
     polls_in_progress = models.ManyToManyField('Poll', blank=True, null=True,
                                                related_name='in_progress')
@@ -57,6 +57,8 @@ class Question(models.Model):
     text = models.TextField()
     kind = models.CharField(max_length=1, choices=KIND_CHOICES)
 
+    POPULAR_ANSWERS_COUNT = 3
+
     def answered(self, user):
         """Проверка на то, что данный пользователь уже ответил на вопрос
         """
@@ -68,13 +70,18 @@ class Question(models.Model):
     def get_absolute_url(self):
         return reverse('user_poll_details', args=[str(self.poll.pk)])
 
-    @property
     def popular_answers(self):
-        """Опросы по популярным ответам в процентном соотношении
+        """"Опросы по популярным ответам в процентном соотношении
         от большего к меньшому"""
         answers = self.answers.all()
-        popular = answers.annotate(cnt=Count('useranswers')).order_by('-cnt')
+        popular = (answers.annotate(percent=Count('useranswer') * 100 /
+                   self.all_answers).order_by('-percent')
+                   [:self.POPULAR_ANSWERS_COUNT])
         return popular
+
+    @property
+    def all_answers(self):
+        return UserAnswer.objects.filter(question=self).count()
 
     def __unicode__(self):
         return u'{}'.format(self.text)

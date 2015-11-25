@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from django.contrib.auth.admin import UserAdmin
 
 from django.contrib import admin
 
-from models import Poll, Question, Answer, UserAnswers, PollUser
+from models import Poll, Question, Answer, UserAnswer, PollUser
 
 
 class PollAdmin(admin.ModelAdmin):
@@ -27,6 +28,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 admin.site.register(Poll, PollAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
-admin.site.register(UserAnswers, UserAnswersAdmin)
-admin.site.register(PollUser, UserProfileAdmin)
+admin.site.register(UserAnswer, UserAnswersAdmin)
+admin.site.register(PollUser, UserAdmin)
 

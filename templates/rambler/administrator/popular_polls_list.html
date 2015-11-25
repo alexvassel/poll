@@ -5,14 +5,15 @@
 
     <table class="table">
         <tr>
-            <th>Имя</th>
+            <th>Имя опроса</th>
             <th>Пройден раз</th>
         </tr>
-        {% for poll in polls %}
+        {% for poll in instances %}
             <tr>
                 <td>{{ poll.name }}</td>
                 <td>{{ poll.cnt }}</td>
             </tr>
         {% endfor %}
     </table>
+    {% include "rambler/common/paginator.html" with instances=instances %}
 {% endblock %}

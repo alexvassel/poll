@@ -27,6 +27,8 @@ $( document ).ready(function() {
         var questionId = $(select).data('question');
         var answersIds = $(select).val();
 
+
+
         $.ajax({
           type: "POST",
           url: currentURL,
@@ -42,7 +44,7 @@ $( document ).ready(function() {
           },
           error: function(){
             alert(COMMON_ERROR);
-          },
+          }
         });
     });
     // Проверяем, что на все вопросы ответили и сохраняем ответ
