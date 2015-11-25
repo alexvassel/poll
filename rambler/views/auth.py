@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.utils.decorators import method_decorator
@@ -12,7 +12,7 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('/registration/login/')
+            return redirect('django.contrib.auth.views.login')
 
     else:
         form = CustomUserCreationForm()
@@ -25,7 +25,13 @@ def register(request):
 
 
 class LoggedInMixin(object):
-
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(LoggedInMixin, self).dispatch(*args, **kwargs)
+
+
+class IsSuperuserMixin(object):
+    """Проверка, что пользователь - superuser"""
+    @method_decorator(user_passes_test(lambda u: u.is_superuser))
+    def dispatch(self, *args, **kwargs):
+        return super(IsSuperuserMixin, self).dispatch(*args, **kwargs)

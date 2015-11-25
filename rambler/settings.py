@@ -45,6 +45,8 @@ INSTALLED_APPS = (
 
 LOGIN_REDIRECT_URL = '/'
 
+LOGIN_URL = '/registration/login/'
+
 LOGOUT_URL = '/'
 
 MIDDLEWARE_CLASSES = (

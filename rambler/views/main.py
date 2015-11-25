@@ -14,6 +14,9 @@ from rambler.helpers import STATUSES, UpdateContextMixin
 from rambler.models import Poll, UserAnswer, Question, Answer
 
 
+from rambler.views.auth import LoggedInMixin
+
+
 # Опросы
 class PollDetailView(DetailView):
     model = Poll
@@ -21,7 +24,7 @@ class PollDetailView(DetailView):
     template_name = 'rambler/single-poll.html'
 
 
-class PollTryView(PollDetailView):
+class PollTryView(LoggedInMixin, PollDetailView):
     """Вывод шаблона для прохождения опроса,
     а также сохранение ответа на вопрос
     """
@@ -51,7 +54,7 @@ class PollTryView(PollDetailView):
         return JsonResponse({'status': STATUSES['OK']})
 
 
-class PollFinishView(View):
+class PollFinishView(LoggedInMixin, View):
     """Помечаем опрос, как завершенный данным пользователем"""
     def post(self, request, *args, **kw):
         poll_pk = request.POST.get('poll_pk')
@@ -71,7 +74,7 @@ class PollListView(ListView):
     template_name = 'rambler/polls.html'
     context_object_name = 'instances'
     anonymous = False
-    POLLS_PER_PAGE = 1
+    POLLS_PER_PAGE = 10
 
     def get_queryset(self):
         qs = Poll.objects.order_by('-weight', '-created__weight')
@@ -88,7 +91,7 @@ class PollListView(ListView):
         return polls
 
 
-class PollCreateView(CreateView):
+class PollCreateView(LoggedInMixin, CreateView):
     model = Poll
     form_class = PollForm
     template_name = 'rambler/form.html'
@@ -98,13 +101,13 @@ class PollCreateView(CreateView):
         return super(PollCreateView, self).form_valid(form)
 
 
-class PollUpdateView(UpdateView):
+class PollUpdateView(LoggedInMixin, UpdateView):
     model = Poll
     fields = ['name', 'weight']
     template_name = 'rambler/form.html'
 
 
-class PollDeleteView(DeleteView):
+class PollDeleteView(LoggedInMixin, DeleteView):
     model = Poll
 
     def get_success_url(self):
@@ -113,7 +116,7 @@ class PollDeleteView(DeleteView):
 
 # Вопросы
 
-class QuestionCreateView(UpdateContextMixin, CreateView):
+class QuestionCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
     template_name = 'rambler/form.html'
@@ -124,7 +127,7 @@ class QuestionCreateView(UpdateContextMixin, CreateView):
         return super(QuestionCreateView, self).form_valid(form)
 
 
-class QuestionUpdateView(UpdateContextMixin, UpdateView):
+class QuestionUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Question
     top_model = Poll
     fields = ['text', 'kind']
@@ -139,7 +142,7 @@ class QuestionDeleteView(DeleteView):
 
 
 # Ответы
-class AnswerCreateView(UpdateContextMixin, CreateView):
+class AnswerCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
     template_name = 'rambler/form.html'
@@ -151,14 +154,14 @@ class AnswerCreateView(UpdateContextMixin, CreateView):
         return super(AnswerCreateView, self).form_valid(form)
 
 
-class AnswerUpdateView(UpdateContextMixin, UpdateView):
+class AnswerUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Answer
     fields = ['text']
     template_name = 'rambler/form.html'
     top_model = Question
 
 
-class AnswerDeleteView(DeleteView):
+class AnswerDeleteView(LoggedInMixin, DeleteView):
     model = Answer
 
     def get_success_url(self):
@@ -166,11 +169,11 @@ class AnswerDeleteView(DeleteView):
 
 
 # Статистика
-class PopularPollsView(ListView):
+class PopularPollsView(LoggedInMixin, ListView):
     template_name = 'rambler/stat/popular-polls.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 1
+    POLLS_PER_PAGE = 10
 
     def get_queryset(self):
         # "Опросы по популярности от самого популярного до менее популярных"
@@ -188,14 +191,14 @@ class PopularPollsView(ListView):
 
 
 # Статистика
-class PopularAnswersView(ListView):
+class PopularAnswersView(LoggedInMixin, ListView):
     """"Опросы по популярным ответам в процентном соотношении
         от большего к меньшому"""
 
     template_name = 'rambler/stat/popular-answers.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 1
+    POLLS_PER_PAGE = 10
 
     def get_queryset(self):
         # "Опросы по популярности от самого популярного до менее популярных"

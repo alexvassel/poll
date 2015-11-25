@@ -3,9 +3,10 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
 from rambler.models import Poll, PollUser, Question, UserAnswer
+from rambler.views.auth import IsSuperuserMixin
 
 
-class StatView(TemplateView):
+class StatView(IsSuperuserMixin, TemplateView):
     """Статистика, видная админу"""
     template_name = 'rambler/administrator/common_stat.html'
 
@@ -38,7 +39,7 @@ class StatView(TemplateView):
         return context
 
 
-class PopularPollsView(ListView):
+class PopularPollsView(IsSuperuserMixin, ListView):
     template_name = 'rambler/administrator/popular_polls_list.html'
     context_object_name = 'instances'
 
@@ -58,7 +59,7 @@ class PopularPollsView(ListView):
         return polls
 
 
-class PopularUsersView(ListView):
+class PopularUsersView(IsSuperuserMixin, ListView):
     template_name = 'rambler/administrator/popular_users_list.html'
     context_object_name = 'instances'
 
@@ -78,7 +79,7 @@ class PopularUsersView(ListView):
         return polls
 
 
-class UsersView(ListView):
+class UsersView(IsSuperuserMixin, ListView):
     """Все пользователи"""
     template_name = 'rambler/administrator/users_list.html'
     context_object_name = 'instances'
@@ -97,7 +98,7 @@ class UsersView(ListView):
         return users
 
 
-class UserDetailView(UpdateView):
+class UserDetailView(IsSuperuserMixin, UpdateView):
     """Редактирование пользователя"""
     model = PollUser
     template_name = 'rambler/form.html'
