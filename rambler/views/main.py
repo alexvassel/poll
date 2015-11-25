@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db import transaction
 from django.db.models import Count
 
 from django.http import JsonResponse
@@ -34,6 +35,7 @@ class PollTryView(PollDetailView):
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""
+
         question_id = request.POST.get('question_id')
         answers_ids = (request.POST.getlist('answers_ids[]') or
                        request.POST.get('answers_ids'))
@@ -42,7 +44,7 @@ class PollTryView(PollDetailView):
                        else [answers_ids])
         for answer_id in answers_ids:
             ua = UserAnswer(user=request.user.polluser,
-                            question_id=question_id, aswer_id=answer_id)
+                            question_id=question_id, answer_id=answer_id)
             ua.save()
 
         return JsonResponse({'status': STATUSES['OK']})
@@ -56,9 +58,10 @@ class PollFinishView(View):
         poll = Poll.objects.get(pk=poll_pk)
 
         # Опрос переходит из polls_in_progress в finished_polls
-        # TODO транзакция (любой реквест в джанге - транзакция)
-        user.polls_in_progress.remove(poll)
-        user.finished_polls.add(poll)
+
+        with transaction.atomic():
+            user.polls_in_progress.remove(poll)
+            user.finished_polls.add(poll)
 
         return JsonResponse({'status': STATUSES['OK']})
 
