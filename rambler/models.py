@@ -13,8 +13,10 @@ class PollUser(AbstractUser):
     """Своя модель пользователя"""
     weight = models.PositiveSmallIntegerField(blank=True, null=True,
                                               verbose_name=u'Вес')
+    # Хранение начатых пользователем опросов
     polls_in_progress = models.ManyToManyField('Poll', blank=True, null=True,
                                                related_name='in_progress')
+    # Хранение завершенных пользователем опросов
     finished_polls = models.ManyToManyField('Poll', blank=True, null=True,
                                             related_name='finished')
 
@@ -26,8 +28,6 @@ class PollUser(AbstractUser):
 
 
 class Poll(models.Model):
-    """
-    """
     name = models.CharField(max_length=30, verbose_name=u'Имя')
     slug = models.SlugField(unique=True, max_length=30, db_index=True)
     weight = models.PositiveSmallIntegerField(verbose_name='Вес',
@@ -38,8 +38,8 @@ class Poll(models.Model):
     def get_absolute_url(self):
         return reverse('user_poll_details', args=[str(self.pk)])
 
-    # TODO только если создаем объект
     def save(self, *args, **kwargs):
+        # Созлаем slug транслитерацией имени
         self.slug = slugify(unidecode(self.name))
         super(Poll, self).save(*args, **kwargs)
 
@@ -48,8 +48,7 @@ class Poll(models.Model):
 
 
 class Question(models.Model):
-    """
-    """
+    # От типа зависит рендер ответа multiple select
     KIND_CHOICES = (
         ('s', u'Один ответ'),
         ('m', u'Несолько ответов'),
@@ -59,14 +58,22 @@ class Question(models.Model):
     kind = models.CharField(max_length=1, choices=KIND_CHOICES,
                             verbose_name=u'Тип вопроса')
 
+    # Количество выводимых у опроса популярных ответов
     POPULAR_ANSWERS_COUNT = 3
 
     def answered(self, user):
         """Проверка на то, что данный пользователь уже ответил на вопрос
         """
+
+        # Так как БД денормализована и в модели UserAnswer
+        # есть ссылка на вопрос,
+        # каждый раз, когда мы проверяем ответил ли пользователь на вопрос
+        # мы обращаемся сразу к модели UserAnswer
+        # а не ищем сначала по вопросу ответ
         return UserAnswer.objects.filter(user=user, question=self)
 
     def is_multiple(self):
+        # Проверка типа вопроса
         return True if self.kind == self.KIND_CHOICES[1][0] else False
 
     def get_absolute_url(self):
@@ -90,7 +97,6 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    """"""
     question = models.ForeignKey(Question, related_name='answers')
     text = models.TextField(verbose_name=u'Текст ответа')
 
@@ -112,6 +118,5 @@ class UserAnswer(models.Model):
     # отвечал ли пользователь на данный вопрос (Question.answered)
     question = models.ForeignKey(Question)
 
-    # TODO метод создания инстанса
     def __unicode__(self):
         return u'{}'.format(self.pk)

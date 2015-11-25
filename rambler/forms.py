@@ -3,15 +3,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
+from rambler.helpers import BootstrapFormMixin
 from rambler.models import Poll, Question, Answer, PollUser
-
-
-class BootstrapFormMixin(object):
-    """Миксин, который на все поля формы вешает bootstrap класс form-control"""
-    def __init__(self, *args, **kwargs):
-        super(BootstrapFormMixin, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
 
 
 class PollForm(BootstrapFormMixin, forms.ModelForm):
@@ -40,14 +33,15 @@ class UserForm(BootstrapFormMixin, forms.ModelForm):
 
 class CustomUserCreationForm(BootstrapFormMixin, UserCreationForm):
     """Форма для регистрации нового пользователя
-    работает с кастомной моделью User
-    """
+    работает с кастомной моделью User"""
     class Meta:
         model = PollUser
-        fields = ("username",)
+        fields = ('username',)
 
     def __init__(self, *args, **kwargs):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
+        # Переводим английские названия полей
+        # а также убираем английские подсказки к полям
         self.fields['username'].label = u'Имя пользователя'
         self.fields['username'].help_text = ''
         self.fields['password1'].label = u'Пароль'
@@ -56,7 +50,19 @@ class CustomUserCreationForm(BootstrapFormMixin, UserCreationForm):
 
 
 class LoginForm(BootstrapFormMixin, AuthenticationForm):
+    """Форма логина"""
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
+        # Переводим английские названия полей
         self.fields['username'].label = u'Имя пользователя'
         self.fields['password'].label = u'Пароль'
+
+
+class FinishPollForm(forms.Form):
+    """Форма сохранения pk завершаемого опроса"""
+    poll_pk = forms.IntegerField()
+
+
+class UserAnswerForm(forms.Form):
+    """Форма сохранения данного пользователем ответа"""
+    question_id = forms.IntegerField()

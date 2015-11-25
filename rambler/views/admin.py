@@ -3,6 +3,7 @@ from decimal import Decimal, getcontext
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
+
 from rambler.forms import UserForm
 from rambler.models import Poll, PollUser, Question, UserAnswer
 from rambler.views.auth import IsSuperuserMixin
@@ -15,7 +16,8 @@ class StatView(IsSuperuserMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StatView, self).get_context_data(**kwargs)
 
-        # Количество цифр в Decimal
+        # Максимальная точность (количество цифр)
+        # результата арифметических операций с Decimal
         getcontext().prec = 3
 
         all_polls = Poll.objects.count()
@@ -51,7 +53,7 @@ class PopularPollsView(IsSuperuserMixin, ListView):
     POLLS_PER_PAGE = 10
 
     # "Администратор видит статистику
-    # по самым популярным пользователям и опросам"
+    # по самым популярным опросам"
     def get_queryset(self):
         qs = Poll.objects.annotate(cnt=Count('finished'))
 
@@ -71,7 +73,7 @@ class PopularUsersView(IsSuperuserMixin, ListView):
     USERS_PER_PAGE = 10
 
     # "Администратор видит статистику
-    # по самым популярным пользователям и опросам"
+    # по самым популярным пользователям"
     def get_queryset(self):
         qs = PollUser.objects.annotate(cnt=Count('finished_polls'))
 
@@ -86,10 +88,10 @@ class PopularUsersView(IsSuperuserMixin, ListView):
 
 class UsersView(IsSuperuserMixin, ListView):
     """Все пользователи"""
-    template_name = 'rambler/administrator/users_list.html'
+    template_name = 'rambler/administrator/users.html'
     context_object_name = 'instances'
 
-    USERS_PER_PAGE = 1
+    USERS_PER_PAGE = 10
 
     def get_queryset(self):
         qs = PollUser.objects.all()

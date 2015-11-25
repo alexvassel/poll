@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.utils.decorators import method_decorator
+
 from rambler.forms import CustomUserCreationForm
 
 
@@ -13,7 +14,6 @@ def register(request):
         if form.is_valid():
             form.save()
             return redirect('django.contrib.auth.views.login')
-
     else:
         form = CustomUserCreationForm()
 
@@ -21,17 +21,18 @@ def register(request):
     data.update(csrf(request))
     data['form'] = form
 
-    return render(request, 'registration/start_registration.html', data)
+    return render(request, 'registration/register.html', data)
 
 
 class LoggedInMixin(object):
+    """Миксин для проверки, что пользователь авторизован"""
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(LoggedInMixin, self).dispatch(*args, **kwargs)
 
 
 class IsSuperuserMixin(object):
-    """Проверка, что пользователь - superuser"""
+    """Миксин для проверки, что пользователь - superuser"""
     @method_decorator(user_passes_test(lambda u: u.is_superuser))
     def dispatch(self, *args, **kwargs):
         return super(IsSuperuserMixin, self).dispatch(*args, **kwargs)

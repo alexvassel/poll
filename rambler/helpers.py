@@ -3,14 +3,15 @@
 import httplib
 
 
-STATUSES = {'OK': httplib.OK}
+STATUSES = {'OK': httplib.OK, 'ERROR': httplib.INTERNAL_SERVER_ERROR}
 
 
 class UpdateContextMixin(object):
-    # Миксин
-    # Добавляет в контекст объект модели top_model
-    # Первичный ключ объекта должен содержаться в
-    # self.kwargs['top_object_pk']
+    """Миксин
+    Добавляет в контекст объект модели top_model
+    Первичный ключ добавляемого объекта должен содержаться в
+    self.kwargs['top_object_pk']
+    """
 
     top_model = None
 
@@ -20,3 +21,11 @@ class UpdateContextMixin(object):
         obj = self.top_model.objects.get(pk=self.kwargs['top_object_pk'])
         context['upper_object'] = obj
         return context
+
+
+class BootstrapFormMixin(object):
+    """Миксин, который на все поля формы вешает bootstrap класс form-control"""
+    def __init__(self, *args, **kwargs):
+        super(BootstrapFormMixin, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})

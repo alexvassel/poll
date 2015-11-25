@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h3>Популярные опросы</h3>
+    <h3>Популярные пользователи</h3>
 
     <table class="table">
         <tr>
@@ -15,5 +15,5 @@
             </tr>
         {% endfor %}
     </table>
-    {% include "rambler/common/paginator.html" with instances=instances %}
+    {% include "rambler/parts/paginator.html" with instances=instances %}
 {% endblock %}

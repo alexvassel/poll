@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
+from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count
 from django.core.paginator import Paginator
-
-from django.http import JsonResponse
-
+from django.http import JsonResponse, HttpResponse
 from django.views.generic import (ListView, DetailView, CreateView,
                                   UpdateView, DeleteView, View)
 
-from rambler.forms import PollForm, QuestionForm, AnswerForm
+from rambler.forms import (PollForm, QuestionForm, AnswerForm, FinishPollForm,
+                           UserAnswerForm)
 from rambler.helpers import STATUSES, UpdateContextMixin
-
 from rambler.models import Poll, UserAnswer, Question, Answer
-
-
 from rambler.views.auth import LoggedInMixin
 
 
@@ -30,22 +27,36 @@ class PollTryView(LoggedInMixin, PollDetailView):
     """
     template_name = 'rambler/try-poll.html'
 
+    ERROR = 'Вы уже проходили данный опрос'
+
     def get(self, request, *args, **kwargs):
-        # Сохраняем текущий опрос как начатый пользователем
         user = request.user
         poll = self.get_object()
+
+        # Два раза пользователь не может пройти тот же опрос
+        if user.finished_polls.filter(id=poll.pk).exists():
+            return HttpResponse(self.ERROR)
+
+        # Сохраняем текущий опрос как начатый пользователем
         user.polls_in_progress.add(poll)
+
         return super(PollTryView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""
+        form = UserAnswerForm(request.POST)
 
-        question_id = request.POST.get('question_id')
+        if not form.is_valid():
+            return JsonResponse({'status': STATUSES['ERROR']})
+
+        question_id = form.cleaned_data['question_id']
+
         answers_ids = (request.POST.getlist('answers_ids[]') or
                        request.POST.get('answers_ids'))
 
         answers_ids = (answers_ids if isinstance(answers_ids, list)
                        else [answers_ids])
+
         for answer_id in answers_ids:
             ua = UserAnswer(user=request.user,
                             question_id=question_id, answer_id=answer_id)
@@ -57,12 +68,15 @@ class PollTryView(LoggedInMixin, PollDetailView):
 class PollFinishView(LoggedInMixin, View):
     """Помечаем опрос, как завершенный данным пользователем"""
     def post(self, request, *args, **kw):
-        poll_pk = request.POST.get('poll_pk')
+        form = FinishPollForm(request.POST)
+
+        if not form.is_valid():
+            return JsonResponse({'status': STATUSES['ERROR']})
+
         user = request.user
-        poll = Poll.objects.get(pk=poll_pk)
+        poll = Poll.objects.get(pk=form.cleaned_data['poll_pk'])
 
         # Опрос переходит из polls_in_progress в finished_polls
-
         with transaction.atomic():
             user.polls_in_progress.remove(poll)
             user.finished_polls.add(poll)
@@ -73,6 +87,8 @@ class PollFinishView(LoggedInMixin, View):
 class PollListView(ListView):
     template_name = 'rambler/polls.html'
     context_object_name = 'instances'
+    # Этот класс отвечает за вывод опросов как для анонимных
+    # так и для авторизованных пользователей
     anonymous = False
     POLLS_PER_PAGE = 10
 
@@ -111,11 +127,10 @@ class PollDeleteView(LoggedInMixin, DeleteView):
     model = Poll
 
     def get_success_url(self):
-        return '/polls/'.format(self.object.pk)
+        return reverse('index', args=[])
 
 
 # Вопросы
-
 class QuestionCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
@@ -123,6 +138,8 @@ class QuestionCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     top_model = Poll
 
     def form_valid(self, form):
+        # При создании записываем в инстанс
+        # foreign key на верхнеуровневый объект (опрос)
         form.instance.poll = Poll.objects.get(pk=self.kwargs['top_object_pk'])
         return super(QuestionCreateView, self).form_valid(form)
 
@@ -138,7 +155,7 @@ class QuestionDeleteView(DeleteView):
     model = Question
 
     def get_success_url(self):
-        return '/poll/{0}/'.format(self.object.poll.pk)
+        return reverse('poll_details', args=[str(self.object.poll.pk)])
 
 
 # Ответы
@@ -149,6 +166,8 @@ class AnswerCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     top_model = Question
 
     def form_valid(self, form):
+        # При создании записываем в инстанс
+        # foreign key на верхнеуровневый объект (вопрос)
         form.instance.question = (Question.objects.
                                   get(pk=self.kwargs['top_object_pk']))
         return super(AnswerCreateView, self).form_valid(form)
@@ -165,7 +184,8 @@ class AnswerDeleteView(LoggedInMixin, DeleteView):
     model = Answer
 
     def get_success_url(self):
-        return '/poll/{0}/'.format(self.object.question.poll.pk)
+        return reverse('poll_details',
+                       args=[str(self.object.question.poll.pk)])
 
 
 # Статистика
@@ -190,10 +210,9 @@ class PopularPollsView(LoggedInMixin, ListView):
         return polls
 
 
-# Статистика
 class PopularAnswersView(LoggedInMixin, ListView):
     """"Опросы по популярным ответам в процентном соотношении
-        от большего к меньшому"""
+    от большего к меньшому"""
 
     template_name = 'rambler/stat/popular-answers.html'
     context_object_name = 'instances'
@@ -201,8 +220,6 @@ class PopularAnswersView(LoggedInMixin, ListView):
     POLLS_PER_PAGE = 10
 
     def get_queryset(self):
-        # "Опросы по популярности от самого популярного до менее популярных"
-        # Сверху опросы, пройденные большим количеством пользователей
         qs = Poll.objects.filter(created=self.request.user)
 
         paginator = Paginator(qs, self.POLLS_PER_PAGE)

@@ -22,7 +22,6 @@ $( document ).ready(function() {
             return false;
         }
 
-
         var currentButton = $(this);
         var questionId = $(select).data('question');
         var answersIds = $(select).val();
