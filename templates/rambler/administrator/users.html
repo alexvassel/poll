@@ -10,7 +10,7 @@
         </tr>
         {% for polluser in users %}
             <tr>
-                <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.user.username }}</a></td>
+                <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.username }}</a></td>
                 <td>{{ polluser.weight }}</td>
             </tr>
         {% endfor %}

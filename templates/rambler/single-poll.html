@@ -2,7 +2,7 @@
 
 {% block content %}
     <h3>{{ poll.name }}</h3>
-    {% if user.is_authenticated and poll.created == user.polluser %}
+    {% if user.is_authenticated and poll.created == user %}
         Ссылка для прохождения - <code>http://{{ request.get_host }}{% url "try_poll" poll.slug %}</code>
         <br><br>
         <form method="POST" action="{% url "user_poll_delete" poll.pk %}">
@@ -18,7 +18,7 @@
             <li class="list-group-item active">
                 <h4>{{ question.text }}</h4>
                 <br>
-                {% if user.is_authenticated and poll.created == user.polluser %}
+                {% if user.is_authenticated and poll.created == user %}
                     <form method="POST" action="{% url "question_delete" question.poll.pk question.pk %}">
                         {% csrf_token %}
                         <input type="submit" value="Удалить вопрос" class="btn btn-danger btn-xs"/>
@@ -31,7 +31,7 @@
                 {% for answer in question.answers.all %}
                     <li class="list-group-item">
                         {{ answer.text }}
-                        {% if user.is_authenticated and poll.created == user.polluser %}
+                        {% if user.is_authenticated and poll.created == user %}
                             <br><br>
                             <form method="POST" action="{% url "answer_delete" answer.question.poll.pk answer.question.pk answer.pk %}">
                                 {% csrf_token %}
@@ -43,13 +43,13 @@
                     </li>
                 {% endfor %}
             </ul>
-            {% if user.is_authenticated and poll.created == user.polluser %}
+            {% if user.is_authenticated and poll.created == user %}
                 <a href="{% url 'answer_add' question.poll.pk question.pk %}" class="btn btn-warning" role="button">Добавить ответ</a>
             {% endif %}
             <br><br>
         {% endfor %}
     </ul>
-    {% if user.is_authenticated and poll.created == user.polluser %}
+    {% if user.is_authenticated and poll.created == user %}
         <a href="{% url "question_add" poll.pk %}" class="btn btn-info" role="button">Добавить вопрос</a>
     {% endif %}
 {% endblock %}

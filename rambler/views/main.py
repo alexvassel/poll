@@ -28,7 +28,7 @@ class PollTryView(PollDetailView):
 
     def get(self, request, *args, **kwargs):
         # Сохраняем текущий опрос как начатый пользователем
-        user = self.request.user.polluser
+        user = request.user
         poll = self.get_object()
         user.polls_in_progress.add(poll)
         return super(PollTryView, self).get(request, *args, **kwargs)
@@ -43,7 +43,7 @@ class PollTryView(PollDetailView):
         answers_ids = (answers_ids if isinstance(answers_ids, list)
                        else [answers_ids])
         for answer_id in answers_ids:
-            ua = UserAnswer(user=request.user.polluser,
+            ua = UserAnswer(user=request.user,
                             question_id=question_id, answer_id=answer_id)
             ua.save()
 
@@ -54,7 +54,7 @@ class PollFinishView(View):
     """Помечаем опрос, как завершенный данным пользователем"""
     def post(self, request, *args, **kw):
         poll_pk = request.POST.get('poll_pk')
-        user = self.request.user.polluser
+        user = request.user
         poll = Poll.objects.get(pk=poll_pk)
 
         # Опрос переходит из polls_in_progress в finished_polls
@@ -75,7 +75,7 @@ class PollListView(ListView):
         qs = Poll.objects.order_by('-weight', '-created__weight')
         if self.anonymous:
             return qs
-        return qs.filter(created=self.request.user.polluser)
+        return qs.filter(created=self.request.user)
 
 
 class PollCreateView(CreateView):
@@ -84,7 +84,7 @@ class PollCreateView(CreateView):
     template_name = 'rambler/form.html'
 
     def form_valid(self, form):
-        form.instance.created = self.request.user.polluser
+        form.instance.created = self.request.user
         return super(PollCreateView, self).form_valid(form)
 
 
@@ -162,7 +162,7 @@ class UserStatView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(UserStatView, self).get_context_data(**kwargs)
-        user = self.request.user.polluser
+        user = self.request.user
 
         # "Опросы по популярности от самого популярного до менее популярных"
         # Сверху опросы, пройденные большим количеством пользователей
@@ -173,6 +173,7 @@ class UserStatView(TemplateView):
         # Опросы по популярным ответам в процентном соотношении
         # от большего к меньшому
         context['polls_popular_by_answers'] = (Poll.objects.annotate
-                                               (cnt=Count('questions__answers__useranswer')).
+                                               (cnt=Count
+                                               ('questions__answers__useranswer')).
                                                order_by('-cnt'))
         return context

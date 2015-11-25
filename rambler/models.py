@@ -4,14 +4,13 @@ from django.db.models import Count
 
 from unidecode import unidecode
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.db import models
 from django.template.defaultfilters import slugify
 
 
-class PollUser(models.Model):
+class PollUser(AbstractUser):
     """Расширение стандартной модели User"""
-    user = models.OneToOneField(User)
     weight = models.PositiveSmallIntegerField(blank=True, null=True)
     polls_in_progress = models.ManyToManyField('Poll', blank=True, null=True,
                                                related_name='in_progress')
@@ -19,10 +18,10 @@ class PollUser(models.Model):
                                             related_name='finished')
 
     def get_absolute_url(self):
-        return '/administrator/user/{}/edit/'.format(self.pk)
+        return reverse('admin_user', args=[str(self.pk)])
 
     def __unicode__(self):
-        return u'{}'.format(self.user.username)
+        return u'{}'.format(self.username)
 
 
 class Poll(models.Model):
@@ -61,7 +60,7 @@ class Question(models.Model):
     def answered(self, user):
         """Проверка на то, что данный пользователь уже ответил на вопрос
         """
-        return UserAnswer.objects.filter(user=user.polluser, question=self)
+        return UserAnswer.objects.filter(user=user, question=self)
 
     def is_multiple(self):
         return True if self.kind == self.KIND_CHOICES[1][0] else False
