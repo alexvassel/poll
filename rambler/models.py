@@ -84,8 +84,8 @@ class Question(models.Model):
         от большего к меньшому"""
         answers = self.answers.all()
         popular = (answers.annotate(percent=Count('useranswer') * 100 /
-                   self.all_answers).order_by('-percent')
-                   [:self.POPULAR_ANSWERS_COUNT])
+                   self.all_answers, cnt=Count('useranswer'))
+                   .order_by('-percent')[:self.POPULAR_ANSWERS_COUNT])
         return popular
 
     @property

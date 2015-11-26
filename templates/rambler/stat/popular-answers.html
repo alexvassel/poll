@@ -10,11 +10,13 @@
                 <table class="table">
                     <tr>
                         <th>Текст ответа</th>
+                        <th>Количество ответов</th>
                         <th>Популярность</th>
                     </tr>
                     {% for answer in question.popular_answers %}
                         <tr>
                             <td>{{ answer.text }}</td>
+                            <td>{{ answer.cnt }}</td>
                             <td>
                                 {% if answer.percent == None %}
                                     Нет ответов
