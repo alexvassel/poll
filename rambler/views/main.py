@@ -217,7 +217,7 @@ class PopularAnswersView(LoggedInMixin, ListView):
     template_name = 'rambler/stat/popular-answers.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 10
+    POLLS_PER_PAGE = 1
 
     def get_queryset(self):
         qs = Poll.objects.filter(created=self.request.user)
