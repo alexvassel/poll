@@ -132,11 +132,12 @@ class PollListView(ListView):
     POLLS_PER_PAGE = 10
 
     def get_queryset(self):
-        qs = (Poll.objects.order_by('-weight', '-created__weight').
-              prefetch_related('in_progress', 'finished'))
+        qs = Poll.objects.order_by('-weight', '-created__weight')
 
         if not self.anonymous:
+            qs = qs.prefetch_related('in_progress', 'finished')
             qs = qs.filter(created=self.request.user)
+
 
         paginator = Paginator(qs, self.POLLS_PER_PAGE)
         page = self.request.GET.get('page')
