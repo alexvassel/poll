@@ -10,12 +10,14 @@
                         <a href="{{ poll.get_absolute_url }}">
                             {{ poll.name }}
                         </a>
-                        {% if user in in_progress  %}
-                            (<a href="{% url "try_poll" poll.slug %}">Продолжить</a>)
-                        {% elif user in finished %}
-                            (Завершен)
-                        {% else %}
-                            (<a href="{% url "try_poll" poll.slug %}">Начать</a>)
+                        {% if user.is_authenticated %}
+                            {% if user in in_progress  %}
+                                (<a href="{% url "try_poll" poll.slug %}">Продолжить</a>)
+                            {% elif user in finished %}
+                                (Завершен)
+                            {% else %}
+                                (<a href="{% url "try_poll" poll.slug %}">Начать</a>)
+                            {% endif %}
                         {% endif %}
                     {% endwith %}
                 {% endwith %}
