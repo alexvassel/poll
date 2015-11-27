@@ -48,7 +48,6 @@ $( document ).ready(function() {
     });
     // Проверяем, что на все вопросы ответили и сохраняем ответ
     $( "a.finish-poll" ).click(function(e) {
-        var allAnswered = $('.question-root:disabled').length == $('.question-root').length;
         var poll = $('#poll');
         var pollPk = poll.data('pk');
         var NOT_FINISHED_MESSAGE = 'Вы ответили не на все вопросы';
@@ -59,29 +58,23 @@ $( document ).ready(function() {
 
         e.preventDefault();
 
-        if (allAnswered)
-        {
-            $.ajax({
-              type: "POST",
-              url: finishUrl,
-              data: { poll_pk: pollPk },
-              dataType : "json",
-              success: function(response){
-                if (response.status == 200)
-                {
-                  alert(FINISHED_MESSAGE);
-                  location.replace('/');
-                }
-                else alert(ERROR_MESSAGE);
-              },
-              error: function(){
-                alert(ERROR_MESSAGE);
-              }
-            });
-        }
-        else
-        {
-            alert(NOT_FINISHED_MESSAGE);
-        }
+        $.ajax({
+          type: "POST",
+          url: finishUrl,
+          data: { poll_pk: pollPk },
+          dataType : "json",
+          success: function(response){
+            if (response.status == 200)
+            {
+              alert(FINISHED_MESSAGE);
+              location.replace('/');
+            }
+            else if (response.status == 400) alert(NOT_FINISHED_MESSAGE);
+            else alert(ERROR_MESSAGE);
+          },
+          error: function(){
+            alert(ERROR_MESSAGE);
+          }
+        });
     });
 });

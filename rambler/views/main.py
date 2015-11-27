@@ -4,8 +4,8 @@ from django.db import transaction
 from django.db.models import Count
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
-from django.views.generic import (ListView, DetailView, CreateView,
-                                  UpdateView, DeleteView, View)
+from django.views.generic import (ListView, CreateView, UpdateView, DeleteView,
+                                  View)
 from django.views.generic.detail import SingleObjectMixin
 
 from rambler.forms import (PollForm, QuestionForm, AnswerForm, FinishPollForm,
@@ -21,7 +21,7 @@ class PollDetailView(SingleObjectMixin, ListView):
     context_object_name = 'poll'
     template_name = 'rambler/single-poll.html'
 
-    QUESTION_PER_PAGE = 10
+    QUESTION_PER_PAGE = 1
 
     object = None
 
@@ -71,10 +71,6 @@ class PollTryView(LoggedInMixin, PollDetailView):
 
         return super(PollTryView, self).get(request, *args, **kwargs)
 
-    def get_object(self, *args, **kw):
-        return (Poll.objects.prefetch_related('questions__answers').
-                get(slug=self.kwargs['slug']))
-
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""
         form = UserAnswerForm(request.POST)
@@ -97,6 +93,10 @@ class PollTryView(LoggedInMixin, PollDetailView):
 
         return JsonResponse({'status': STATUSES['OK']})
 
+    def get_object(self, *args, **kw):
+        return (Poll.objects.prefetch_related('questions__answers').
+                get(slug=self.kwargs['slug']))
+
 
 class PollFinishView(LoggedInMixin, View):
     """Помечаем опрос, как завершенный данным пользователем"""
@@ -108,6 +108,12 @@ class PollFinishView(LoggedInMixin, View):
 
         user = request.user
         poll = Poll.objects.get(pk=form.cleaned_data['poll_pk'])
+
+        # На все вопросы ответил пользователь?
+        if (poll.questions.count() !=
+            UserAnswer.objects.filter(user=request.user,
+                                      question=poll.questions.all()).count()):
+            return JsonResponse({'status': STATUSES['BAD_REQUEST']})
 
         # Опрос переходит из polls_in_progress в finished_polls
         with transaction.atomic():

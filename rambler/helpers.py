@@ -3,7 +3,8 @@
 import httplib
 
 
-STATUSES = {'OK': httplib.OK, 'ERROR': httplib.INTERNAL_SERVER_ERROR}
+STATUSES = {'OK': httplib.OK, 'ERROR': httplib.INTERNAL_SERVER_ERROR,
+            'BAD_REQUEST': httplib.BAD_REQUEST}
 
 
 class UpdateContextMixin(object):
