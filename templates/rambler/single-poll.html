@@ -14,7 +14,7 @@
         <br><br>
     {% endif %}
     <ul class="list-group">
-        {% for question in poll.questions.all %}
+        {% for question in instances %}
             <li class="list-group-item active">
                 <h4>{{ question.text }}</h4>
                 <br>
@@ -52,4 +52,5 @@
     {% if user.is_authenticated and poll.created == user %}
         <a href="{% url "question_add" poll.pk %}" class="btn btn-info" role="button">Добавить вопрос</a>
     {% endif %}
+    {% include "rambler/parts/paginator.html" with instances=instances %}
 {% endblock %}

@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import (ListView, DetailView, CreateView,
                                   UpdateView, DeleteView, View)
+from django.views.generic.detail import SingleObjectMixin
 
 from rambler.forms import (PollForm, QuestionForm, AnswerForm, FinishPollForm,
                            UserAnswerForm)
@@ -15,14 +16,38 @@ from rambler.views.auth import LoggedInMixin
 
 
 # Опросы
-class PollDetailView(DetailView):
+class PollDetailView(SingleObjectMixin, ListView):
     model = Poll
     context_object_name = 'poll'
     template_name = 'rambler/single-poll.html'
 
+    QUESTION_PER_PAGE = 10
+
+    object = None
+
     def get_object(self, *args, **kw):
         return (Poll.objects.prefetch_related('questions__answers').
                 get(pk=self.kwargs['pk']))
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(PollDetailView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(PollDetailView, self).get_context_data(**kwargs)
+        context['instances'] = self.get_queryset()
+        return context
+
+    def get_queryset(self):
+        qs = self.object.questions.all()
+
+        paginator = Paginator(qs, self.QUESTION_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        questions = (paginator.page(page) if page and page.isdigit()
+                     else paginator.page(1))
+
+        return questions
 
 
 class PollTryView(LoggedInMixin, PollDetailView):
