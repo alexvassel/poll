@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.core.urlresolvers import reverse
-from django.db.models import Count
-
 from unidecode import unidecode
 
+from django.core.urlresolvers import reverse
+from django.db.models import Count
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.template.defaultfilters import slugify

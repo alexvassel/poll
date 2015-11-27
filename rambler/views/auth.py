@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.template.context_processors import csrf
 from django.utils.decorators import method_decorator
 
-from rambler.forms import CustomUserCreationForm
+from ..forms import CustomUserCreationForm
 
 
 def register(request):

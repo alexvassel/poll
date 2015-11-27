@@ -3,8 +3,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-from rambler.helpers import BootstrapFormMixin
-from rambler.models import Poll, Question, Answer, PollUser
+from .helpers import BootstrapFormMixin
+from .models import Poll, Question, Answer, PollUser
 
 
 class PollForm(BootstrapFormMixin, forms.ModelForm):

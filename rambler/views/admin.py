@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+
 from decimal import Decimal, getcontext
+
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView, ListView, UpdateView
 
-from rambler.forms import UserForm
-from rambler.models import Poll, PollUser, Question, UserAnswer
-from rambler.views.auth import IsSuperuserMixin
+from ..forms import UserForm
+from ..models import Poll, PollUser, Question, UserAnswer
+from .auth import IsSuperuserMixin
 
 
 class StatView(IsSuperuserMixin, TemplateView):

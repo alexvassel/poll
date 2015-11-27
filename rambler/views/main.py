@@ -2,26 +2,26 @@
 from django.core.urlresolvers import reverse
 from django.db import transaction
 from django.db.models import Count
-from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import (ListView, CreateView, UpdateView, DeleteView,
                                   View)
 from django.views.generic.detail import SingleObjectMixin
 
-from rambler.forms import (PollForm, QuestionForm, AnswerForm, FinishPollForm,
-                           UserAnswerForm)
-from rambler.helpers import STATUSES, UpdateContextMixin
-from rambler.models import Poll, UserAnswer, Question, Answer
-from rambler.views.auth import LoggedInMixin
+from ..forms import (PollForm, QuestionForm, AnswerForm, FinishPollForm,
+                     UserAnswerForm)
+from ..helpers import STATUSES, UpdateContextMixin, PaginatorMixin
+from ..models import Poll, UserAnswer, Question, Answer
+from ..views.auth import LoggedInMixin
 
 
 # Опросы
-class PollDetailView(SingleObjectMixin, ListView):
+class PollDetailView(SingleObjectMixin, PaginatorMixin, ListView):
     model = Poll
     context_object_name = 'poll'
     template_name = 'rambler/single-poll.html'
 
-    QUESTION_PER_PAGE = 1
+    # Вопросов на странице
+    OBJECTS_PER_PAGE = 1
 
     object = None
 
@@ -41,13 +41,7 @@ class PollDetailView(SingleObjectMixin, ListView):
     def get_queryset(self):
         qs = self.object.questions.all()
 
-        paginator = Paginator(qs, self.QUESTION_PER_PAGE)
-        page = self.request.GET.get('page')
-
-        questions = (paginator.page(page) if page and page.isdigit()
-                     else paginator.page(1))
-
-        return questions
+        return self.get_page(qs)
 
 
 class PollTryView(LoggedInMixin, PollDetailView):
@@ -123,29 +117,24 @@ class PollFinishView(LoggedInMixin, View):
         return JsonResponse({'status': STATUSES['OK']})
 
 
-class PollListView(ListView):
+class PollListView(PaginatorMixin, ListView):
     template_name = 'rambler/polls.html'
     context_object_name = 'instances'
     # Этот класс отвечает за вывод опросов как для анонимных
     # так и для авторизованных пользователей
     anonymous = False
-    POLLS_PER_PAGE = 10
+
+    # Опросов на странице
+    OBJECTS_PER_PAGE = 10
 
     def get_queryset(self):
         qs = Poll.objects.order_by('-weight', '-created__weight')
 
         if not self.anonymous:
-            qs = qs.prefetch_related('in_progress', 'finished')
             qs = qs.filter(created=self.request.user)
+            qs = qs.prefetch_related('in_progress', 'finished')
 
-
-        paginator = Paginator(qs, self.POLLS_PER_PAGE)
-        page = self.request.GET.get('page')
-
-        polls = (paginator.page(page) if page and page.isdigit()
-                 else paginator.page(1))
-
-        return polls
+        return self.get_page(qs)
 
 
 class PollCreateView(LoggedInMixin, CreateView):
@@ -230,11 +219,12 @@ class AnswerDeleteView(LoggedInMixin, DeleteView):
 
 
 # Статистика
-class PopularPollsView(LoggedInMixin, ListView):
+class PopularPollsView(LoggedInMixin, PaginatorMixin, ListView):
     template_name = 'rambler/stat/popular-polls.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 10
+    # Опросов на странице
+    OBJECTS_PER_PAGE = 10
 
     def get_queryset(self):
         # "Опросы по популярности от самого популярного до менее популярных"
@@ -242,31 +232,19 @@ class PopularPollsView(LoggedInMixin, ListView):
         qs = (Poll.objects.filter(created=self.request.user).
               annotate(cnt=Count('finished')).order_by('-cnt'))
 
-        paginator = Paginator(qs, self.POLLS_PER_PAGE)
-        page = self.request.GET.get('page')
-
-        polls = (paginator.page(page) if page and page.isdigit()
-                 else paginator.page(1))
-
-        return polls
+        return self.get_page(qs)
 
 
-class PopularAnswersView(LoggedInMixin, ListView):
+class PopularAnswersView(LoggedInMixin, PaginatorMixin, ListView):
     """"Опросы по популярным ответам в процентном соотношении
     от большего к меньшому"""
 
     template_name = 'rambler/stat/popular-answers.html'
     context_object_name = 'instances'
 
-    POLLS_PER_PAGE = 1
+    # Опросов на странице
+    OBJECTS_PER_PAGE = 1
 
     def get_queryset(self):
         qs = Poll.objects.filter(created=self.request.user)
-
-        paginator = Paginator(qs, self.POLLS_PER_PAGE)
-        page = self.request.GET.get('page')
-
-        polls = (paginator.page(page) if page and page.isdigit()
-                 else paginator.page(1))
-
-        return polls
+        return self.get_page(qs)

@@ -2,6 +2,8 @@
 
 import httplib
 
+from django.core.paginator import Paginator
+
 
 STATUSES = {'OK': httplib.OK, 'ERROR': httplib.INTERNAL_SERVER_ERROR,
             'BAD_REQUEST': httplib.BAD_REQUEST}
@@ -30,3 +32,21 @@ class BootstrapFormMixin(object):
         super(BootstrapFormMixin, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({'class': 'form-control'})
+
+
+class PaginatorMixin(object):
+    """Миксин для распределения объектов ListView по страницам
+    """
+
+    # Объектов на странице
+    OBJECTS_PER_PAGE = None
+
+    def get_page(self, qs):
+        paginator = Paginator(qs, self.OBJECTS_PER_PAGE)
+        page = self.request.GET.get('page')
+
+        objects = (paginator.page(page) if page and page.isdigit()
+                   else paginator.page(1))
+
+        return objects
+
