@@ -20,6 +20,10 @@ class PollDetailView(DetailView):
     context_object_name = 'poll'
     template_name = 'rambler/single-poll.html'
 
+    def get_object(self, *args, **kw):
+        return (Poll.objects.prefetch_related('questions__answers').
+                get(pk=self.kwargs['pk']))
+
 
 class PollTryView(LoggedInMixin, PollDetailView):
     """Вывод шаблона для прохождения опроса,
@@ -41,6 +45,10 @@ class PollTryView(LoggedInMixin, PollDetailView):
         user.polls_in_progress.add(poll)
 
         return super(PollTryView, self).get(request, *args, **kwargs)
+
+    def get_object(self, *args, **kw):
+        return (Poll.objects.prefetch_related('questions__answers').
+                get(slug=self.kwargs['slug']))
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""

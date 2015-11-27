@@ -14,10 +14,10 @@ class PollUser(AbstractUser):
     weight = models.PositiveSmallIntegerField(blank=True, null=True,
                                               verbose_name=u'Вес')
     # Хранение начатых пользователем опросов
-    polls_in_progress = models.ManyToManyField('Poll', blank=True, null=True,
+    polls_in_progress = models.ManyToManyField('Poll', blank=True,
                                                related_name='in_progress')
     # Хранение завершенных пользователем опросов
-    finished_polls = models.ManyToManyField('Poll', blank=True, null=True,
+    finished_polls = models.ManyToManyField('Poll', blank=True,
                                             related_name='finished')
 
     def get_absolute_url(self):
