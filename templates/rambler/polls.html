@@ -5,9 +5,20 @@
     <ul>
         {% for poll in instances %}
             <li>
-                <a href="{{ poll.get_absolute_url }}">
-                    {{ poll.name }}
-                </a>
+                {% with user.polls_in_progress.all as in_progress %}
+                    {% with user.finished_polls.all as finished %}
+                        <a href="{{ poll.get_absolute_url }}">
+                            {{ poll.name }}
+                        </a>
+                        {% if poll in in_progress  %}
+                            (<a href="{% url "try_poll" poll.slug %}">Продолжить</a>)
+                        {% elif poll in finished %}
+                            (Завершен)
+                        {% else %}
+                            (<a href="{% url "try_poll" poll.slug %}">Начать</a>)
+                        {% endif %}
+                    {% endwith %}
+                {% endwith %}
             </li>
         {% endfor %}
     </ul>
