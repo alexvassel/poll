@@ -23,15 +23,13 @@ $( document ).ready(function() {
         }
 
         var currentButton = $(this);
-        var questionId = $(select).data('question');
-        var answersIds = $(select).val();
 
-
+        var form = $(this).parent().find('form.question');
 
         $.ajax({
           type: "POST",
           url: currentURL,
-          data: { question_id: questionId, answers_ids: answersIds },
+          data: form.serialize(),
           dataType : "json",
           success: function(response){
             if (response.status == 200)

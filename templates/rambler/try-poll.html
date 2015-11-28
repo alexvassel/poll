@@ -15,20 +15,22 @@
             {% answered question as user_answered %}
                 <h4 class="active">{{ question.text }}</h4>
                 <br>
-                <div class="question">
-                    <select data-question="{{ question.pk }}" class="form-control question-root"{% if user_answered %}
-                                disabled
-                            {% endif %}
-                            {% if  question.is_multiple %}multiple{% endif %}
-                    >
-                        {% for answer in question.answers.all %}
-                            <option value="{{ answer.pk }}">{{ answer.text }}</option>
-                        {% endfor %}
-                    </select><br>
+                    <form class="question">
+                        <select name="answers_pks" class="form-control"{% if user_answered %}
+                                    disabled
+                                {% endif %}
+                                {% if  question.is_multiple %}multiple{% endif %}
+                        >
+                            {% for answer in question.answers.all %}
+                                <option value="{{ answer.pk }}">{{ answer.text }}</option>
+                            {% endfor %}
+                        </select><br>
+                        <input type="hidden" name="question_pk" value="{{ question.pk }}"/>
+                    </form>
                     {% if not user_answered %}
                         <button type="button" class="btn btn-primary answer">Ответить</button>
                     {% endif %}
-                </div>
+
             <br>
         {% endfor %}
     <br><br>

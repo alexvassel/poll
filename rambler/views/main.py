@@ -67,22 +67,17 @@ class PollTryView(LoggedInMixin, PollDetailView):
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""
-        form = UserAnswerForm(request.POST)
+        form = UserAnswerForm(self.get_object(), request.POST)
 
         if not form.is_valid():
             return JsonResponse({'status': STATUSES['ERROR']})
 
-        question_id = form.cleaned_data['question_id']
+        question_pk = form.cleaned_data['question_pk']
+        answers_pks = form.cleaned_data['answers_pks']
 
-        answers_ids = (request.POST.getlist('answers_ids[]') or
-                       request.POST.get('answers_ids'))
-
-        answers_ids = (answers_ids if isinstance(answers_ids, list)
-                       else [answers_ids])
-
-        for answer_id in answers_ids:
+        for answer_pk in answers_pks:
             ua = UserAnswer(user=request.user,
-                            question_id=question_id, answer_id=answer_id)
+                            question_id=question_pk, answer_id=answer_pk)
             ua.save()
 
         return JsonResponse({'status': STATUSES['OK']})

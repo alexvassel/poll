@@ -65,4 +65,12 @@ class FinishPollForm(forms.Form):
 
 class UserAnswerForm(forms.Form):
     """Форма сохранения данного пользователем ответа"""
-    question_id = forms.IntegerField()
+    question_pk = forms.IntegerField()
+    answers_pks = forms.MultipleChoiceField()
+
+    def __init__(self, poll=None, *args, **kw):
+        super(UserAnswerForm, self).__init__(*args, **kw)
+        self.fields['answers_pks'].choices = ([(a.pk, a.pk) for a in
+                                              Answer.objects.filter
+                                              (question=poll.questions.all())])
+
