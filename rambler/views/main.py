@@ -67,7 +67,7 @@ class PollTryView(LoggedInMixin, PollDetailView):
 
     def post(self, request, *args, **kw):
         """Записываем ответ пользователя"""
-        form = UserAnswerForm(self.get_object(), request.POST)
+        form = UserAnswerForm(self.get_object().questions.all(), request.POST)
 
         if not form.is_valid():
             return JsonResponse({'status': STATUSES['ERROR']})
@@ -99,9 +99,7 @@ class PollFinishView(LoggedInMixin, View):
         poll = Poll.objects.get(pk=form.cleaned_data['poll_pk'])
 
         # На все вопросы ответил пользователь?
-        if (poll.questions.count() !=
-            UserAnswer.objects.filter(user=request.user,
-                                      question=poll.questions.all()).count()):
+        if not all(q.answered(user) for q in poll.questions.all()):
             return JsonResponse({'status': STATUSES['BAD_REQUEST']})
 
         # Опрос переходит из polls_in_progress в finished_polls

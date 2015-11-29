@@ -2,10 +2,17 @@
 
 from django import template
 
+from rambler.forms import UserAnswerForm
+
+
 register = template.Library()
 
 
-@register.assignment_tag(takes_context=True)
-def answered(context, question):
-    """Проверка на то, что текущий пользователь уже ответил на данный вопрос"""
-    return question.answered(user=context['request'].user)
+@register.inclusion_tag('rambler/parts/question-form.html', takes_context=True)
+def get_form(context, question):
+    """Вывод формы для вопроса"""
+    user = context['request'].user
+    form = UserAnswerForm([question], initial={'question_pk': question.pk})
+    # Подготавливаем форму к отображению на странице
+    form.prepare(user, question)
+    return {'form': form}

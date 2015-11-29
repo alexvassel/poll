@@ -71,6 +71,7 @@ class Question(models.Model):
         # а не ищем сначала по вопросу ответ
         return UserAnswer.objects.filter(user=user, question=self)
 
+    @property
     def is_multiple(self):
         # Проверка типа вопроса
         return True if self.kind == self.KIND_CHOICES[1][0] else False

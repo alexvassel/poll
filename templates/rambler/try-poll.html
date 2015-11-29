@@ -12,31 +12,18 @@
     <h2 data-pk="{{ poll.pk }}" id="poll" data-finish_url="{% url 'finish_poll' poll.pk %}">{{ poll.name }}</h2>
         <br>
         {% for question in instances %}
-            {% answered question as user_answered %}
                 <h4 class="active">{{ question.text }}</h4>
                 <br>
                     <form class="question">
-                        <select name="answers_pks" class="form-control"{% if user_answered %}
-                                    disabled
-                                {% endif %}
-                                {% if  question.is_multiple %}multiple{% endif %}
-                        >
-                            {% for answer in question.answers.all %}
-                                <option value="{{ answer.pk }}">{{ answer.text }}</option>
-                            {% endfor %}
-                        </select><br>
-                        <input type="hidden" name="question_pk" value="{{ question.pk }}"/>
+                        {% get_form question %}<br>
                     </form>
                     {% if not user_answered %}
                         <button type="button" class="btn btn-primary answer">Ответить</button>
                     {% endif %}
-
             <br>
         {% endfor %}
     <br><br>
     {% include "rambler/parts/paginator.html" with instances=instances %}
     <br>
-    {% if not instances.has_next %}
-        <a href="#" class="btn btn-danger finish-poll" role="button">Завершить опрос</a>
-    {% endif %}
+    <a href="#" class="btn btn-danger finish-poll" role="button">Завершить опрос</a>
 {% endblock %}

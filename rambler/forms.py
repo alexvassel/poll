@@ -63,14 +63,36 @@ class FinishPollForm(forms.Form):
     poll_pk = forms.IntegerField()
 
 
-class UserAnswerForm(forms.Form):
+class UserAnswerForm(BootstrapFormMixin, forms.Form):
     """Форма сохранения данного пользователем ответа"""
-    question_pk = forms.IntegerField()
-    answers_pks = forms.MultipleChoiceField()
+    question_pk = forms.IntegerField(widget=forms.HiddenInput())
+    answers_pks = forms.ChoiceField(label='')
 
-    def __init__(self, poll=None, *args, **kw):
+    select_field_name = 'answers_pks'
+
+    def __init__(self, questions, *args, **kw):
         super(UserAnswerForm, self).__init__(*args, **kw)
-        self.fields['answers_pks'].choices = ([(a.pk, a.pk) for a in
-                                              Answer.objects.filter
-                                              (question=poll.questions.all())])
+
+        self.fields[self.select_field_name].choices = ([(a.pk, a.text) for a in
+                                                       Answer.objects.filter
+                                                       (question__in=questions)])
+
+    def prepare(self, user, question):
+        """Подготовка формы для вывода на странице вопроса"""
+
+        # Если пользователь уже ответил на вопрос, то disable его
+        if question.answered(user):
+            self._disable_field_widget()
+
+        # Если возможно несколько ответов, то меняем тип select
+        if question.is_multiple:
+            self._change_field_widget()
+
+    def _disable_field_widget(self):
+        self.fields[self.select_field_name].widget.attrs.update({'disabled':
+                                                                 'disabled'})
+
+    def _change_field_widget(self):
+        self.fields[self.select_field_name].widget.attrs.update({'multiple':
+                                                                 True})
 
