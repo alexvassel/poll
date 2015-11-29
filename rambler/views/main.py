@@ -99,8 +99,9 @@ class PollFinishView(LoggedInMixin, View):
         poll = Poll.objects.get(pk=form.cleaned_data['poll_pk'])
 
         # На все вопросы ответил пользователь?
-        if not all(q.answered(user) for q in poll.questions.all()):
-            return JsonResponse({'status': STATUSES['BAD_REQUEST']})
+        for q in poll.questions.all():
+            if not q.answered(user):
+                return JsonResponse({'status': STATUSES['BAD_REQUEST']})
 
         # Опрос переходит из polls_in_progress в finished_polls
         with transaction.atomic():
