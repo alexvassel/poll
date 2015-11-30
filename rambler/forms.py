@@ -75,9 +75,9 @@ class UserAnswerForm(BootstrapFormMixin, forms.Form):
         self.choices = [(a.pk, a.text) for a in (Answer.objects.filter
                                                  (question__in=
                                                   questions))]
-        self.update_choices()
+        self._update_choices()
 
-    def update_choices(self):
+    def _update_choices(self):
         self.fields[self.select_field_name].choices = self.choices
 
     def prepare(self, user, question):
@@ -87,15 +87,6 @@ class UserAnswerForm(BootstrapFormMixin, forms.Form):
         if question.answered(user):
             self._disable_field_widget()
 
-        # Если возможно несколько ответов, то меняем тип select
-        if question.is_multiple:
-            self._change_field_widget()
-
     def _disable_field_widget(self):
         self.fields[self.select_field_name].widget.attrs.update({'disabled':
                                                                  'disabled'})
-
-    def _change_field_widget(self):
-        self.fields[self.select_field_name].widget.attrs.update({'multiple':
-                                                                 True})
-
