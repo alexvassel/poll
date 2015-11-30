@@ -66,16 +66,19 @@ class FinishPollForm(forms.Form):
 class UserAnswerForm(BootstrapFormMixin, forms.Form):
     """Форма сохранения данного пользователем ответа"""
     question_pk = forms.IntegerField(widget=forms.HiddenInput())
-    answers_pks = forms.ChoiceField(label='')
+    answers_pks = forms.MultipleChoiceField(label='')
 
     select_field_name = 'answers_pks'
 
     def __init__(self, questions, *args, **kw):
         super(UserAnswerForm, self).__init__(*args, **kw)
+        self.choices = [(a.pk, a.text) for a in (Answer.objects.filter
+                                                 (question__in=
+                                                  questions))]
+        self.update_choices()
 
-        self.fields[self.select_field_name].choices = ([(a.pk, a.text) for a in
-                                                       Answer.objects.filter
-                                                       (question__in=questions)])
+    def update_choices(self):
+        self.fields[self.select_field_name].choices = self.choices
 
     def prepare(self, user, question):
         """Подготовка формы для вывода на странице вопроса"""
