@@ -42,6 +42,14 @@ class Poll(models.Model):
         self.slug = slugify(unidecode(self.name))
         super(Poll, self).save(*args, **kwargs)
 
+    def answered_questions_count(self, user):
+        """Возвращает количество отвеченных пользователем вопросов
+        в рамках данного опроса
+        """
+        return (UserAnswer.objects.filter(question=self.questions.all(),
+                                          user=user).
+                aggregate(Count('question', distinct=True)))['question__count']
+
     def __unicode__(self):
         return u'{}'.format(self.name)
 

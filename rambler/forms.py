@@ -66,7 +66,7 @@ class FinishPollForm(forms.Form):
 class UserAnswerForm(BootstrapFormMixin, forms.Form):
     """Форма сохранения данного пользователем ответа"""
     question_pk = forms.IntegerField(widget=forms.HiddenInput())
-    answers_pks = forms.MultipleChoiceField(label='')
+    answers_pks = forms.ChoiceField(label='')
 
     select_field_name = 'answers_pks'
 
@@ -87,6 +87,18 @@ class UserAnswerForm(BootstrapFormMixin, forms.Form):
         if question.answered(user):
             self._disable_field_widget()
 
+        # Если возможно несколько ответов, то меняем тип select
+        if question.is_multiple:
+            self._change_field_widget()
+            self._update_choices()
+
     def _disable_field_widget(self):
         self.fields[self.select_field_name].widget.attrs.update({'disabled':
                                                                  'disabled'})
+
+    def _change_field_widget(self):
+        # Необходимо сохранить атрибуты виджета для Bootstrap отображения
+        # селекта
+        widget_attrs = self.fields[self.select_field_name].widget.attrs
+        self.fields[self.select_field_name].widget = (forms.SelectMultiple
+                                                      (attrs=widget_attrs))
