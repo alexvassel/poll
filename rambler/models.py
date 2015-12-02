@@ -58,7 +58,7 @@ class Question(models.Model):
     # От типа зависит рендер ответа multiple select
     KIND_CHOICES = (
         ('s', u'Один ответ'),
-        ('m', u'Несолько ответов'),
+        ('m', u'Несколько ответов'),
     )
     poll = models.ForeignKey(Poll, related_name='questions')
     text = models.TextField(verbose_name=u'Текст вопроса')
