@@ -2,7 +2,7 @@
 
 from django.conf.urls import include, url
 from django.contrib import admin
-from rambler.forms import LoginForm
+from poll.forms import LoginForm
 
 import views.auth
 import views.main

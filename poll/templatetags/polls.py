@@ -2,7 +2,7 @@
 
 from django import template
 
-from rambler.forms import UserAnswerForm
+from poll.forms import UserAnswerForm
 
 
 register = template.Library()
