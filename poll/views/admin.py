@@ -13,7 +13,7 @@ from .auth import IsSuperuserMixin
 
 class StatView(IsSuperuserMixin, TemplateView):
     """Статистика, видная админу"""
-    template_name = 'poll/administrator/common_stat.html'
+    template_name = 'poll/administrator/common-stat.html'
 
     def get_context_data(self, **kwargs):
         context = super(StatView, self).get_context_data(**kwargs)
@@ -49,7 +49,7 @@ class StatView(IsSuperuserMixin, TemplateView):
 
 
 class PopularPollsView(IsSuperuserMixin, ListView):
-    template_name = 'poll/administrator/popular_polls_list.html'
+    template_name = 'poll/administrator/popular-polls-list.html'
     context_object_name = 'instances'
 
     POLLS_PER_PAGE = 10
@@ -69,7 +69,7 @@ class PopularPollsView(IsSuperuserMixin, ListView):
 
 
 class PopularUsersView(IsSuperuserMixin, ListView):
-    template_name = 'poll/administrator/popular_users_list.html'
+    template_name = 'poll/administrator/popular-users-list.html'
     context_object_name = 'instances'
 
     USERS_PER_PAGE = 10

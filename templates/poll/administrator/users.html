@@ -12,10 +12,10 @@
             <tr>
                 <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.username }}</a></td>
                 <td>
-                    {% if answer.weight == None %}
+                    {% if polluser.weight == None %}
                         Нет установлен
                     {% else %}
-                        {{ answer.weight }} %
+                        {{ polluser.weight }}
                     {% endif %}
                 </td>
             </tr>
