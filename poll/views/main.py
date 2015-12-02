@@ -18,7 +18,7 @@ from ..views.auth import LoggedInMixin
 class PollDetailView(SingleObjectMixin, PaginatorMixin, ListView):
     model = Poll
     context_object_name = 'poll'
-    template_name = 'rambler/single-poll.html'
+    template_name = 'poll/single-poll.html'
 
     # Вопросов на странице
     OBJECTS_PER_PAGE = 5
@@ -48,7 +48,7 @@ class PollTryView(LoggedInMixin, PollDetailView):
     """Вывод шаблона для прохождения опроса,
     а также сохранение ответа на вопрос
     """
-    template_name = 'rambler/try-poll.html'
+    template_name = 'poll/try-poll.html'
 
     ERROR = 'Вы уже проходили данный опрос'
 
@@ -113,7 +113,7 @@ class PollFinishView(LoggedInMixin, View):
 
 
 class PollListView(PaginatorMixin, ListView):
-    template_name = 'rambler/polls.html'
+    template_name = 'poll/polls.html'
     context_object_name = 'instances'
     # Этот класс отвечает за вывод опросов как для анонимных
     # так и для авторизованных пользователей
@@ -135,7 +135,7 @@ class PollListView(PaginatorMixin, ListView):
 class PollCreateView(LoggedInMixin, CreateView):
     model = Poll
     form_class = PollForm
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
 
     def form_valid(self, form):
         form.instance.created = self.request.user
@@ -144,7 +144,7 @@ class PollCreateView(LoggedInMixin, CreateView):
 
 class PollUpdateView(LoggedInMixin, UpdateView):
     model = Poll
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
     form_class = PollForm
 
 
@@ -159,7 +159,7 @@ class PollDeleteView(LoggedInMixin, DeleteView):
 class QuestionCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     model = Question
     form_class = QuestionForm
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
     top_model = Poll
 
     def form_valid(self, form):
@@ -173,7 +173,7 @@ class QuestionUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Question
     top_model = Poll
     form_class = QuestionForm
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
 
 
 class QuestionDeleteView(DeleteView):
@@ -187,7 +187,7 @@ class QuestionDeleteView(DeleteView):
 class AnswerCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
     model = Answer
     form_class = AnswerForm
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
     top_model = Question
 
     def form_valid(self, form):
@@ -201,7 +201,7 @@ class AnswerCreateView(LoggedInMixin, UpdateContextMixin, CreateView):
 class AnswerUpdateView(LoggedInMixin, UpdateContextMixin, UpdateView):
     model = Answer
     form_class = AnswerForm
-    template_name = 'rambler/form.html'
+    template_name = 'poll/form.html'
     top_model = Question
 
 
@@ -215,7 +215,7 @@ class AnswerDeleteView(LoggedInMixin, DeleteView):
 
 # Статистика
 class PopularPollsView(LoggedInMixin, PaginatorMixin, ListView):
-    template_name = 'rambler/stat/popular-polls.html'
+    template_name = 'poll/stat/popular-polls.html'
     context_object_name = 'instances'
 
     # Опросов на странице
@@ -234,7 +234,7 @@ class PopularAnswersView(LoggedInMixin, PaginatorMixin, ListView):
     """"Опросы по популярным ответам в процентном соотношении
     от большего к меньшому"""
 
-    template_name = 'rambler/stat/popular-answers.html'
+    template_name = 'poll/stat/popular-answers.html'
     context_object_name = 'instances'
 
     # Опросов на странице

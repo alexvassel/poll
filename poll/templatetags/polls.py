@@ -8,7 +8,7 @@ from poll.forms import UserAnswerForm
 register = template.Library()
 
 
-@register.inclusion_tag('rambler/parts/question-form.html', takes_context=True)
+@register.inclusion_tag('poll/parts/question-form.html', takes_context=True)
 def get_form(context, question):
     """Вывод формы для вопроса"""
     user = context['request'].user

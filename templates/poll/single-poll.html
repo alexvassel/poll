@@ -52,5 +52,5 @@
     {% if user.is_authenticated and poll.created == user %}
         <a href="{% url "question_add" poll.pk %}" class="btn btn-info" role="button">Добавить вопрос</a>
     {% endif %}
-    {% include "rambler/parts/paginator.html" with instances=instances %}
+    {% include "poll/parts/paginator.html" with instances=instances %}
 {% endblock %}

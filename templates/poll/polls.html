@@ -27,5 +27,5 @@
     {% if user.is_authenticated %}
         <a href="{% url 'user_poll_add' %}" class="btn btn-info" role="button">Создать опрос</a>
     {% endif %}
-    {% include "rambler/parts/paginator.html" with instances=instances %}
+    {% include "poll/parts/paginator.html" with instances=instances %}
 {% endblock %}
