@@ -21,7 +21,7 @@ class PollDetailView(SingleObjectMixin, PaginatorMixin, ListView):
     template_name = 'rambler/single-poll.html'
 
     # Вопросов на странице
-    OBJECTS_PER_PAGE = 1
+    OBJECTS_PER_PAGE = 5
 
     object = None
 
