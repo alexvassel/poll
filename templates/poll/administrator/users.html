@@ -11,7 +11,13 @@
         {% for polluser in instances %}
             <tr>
                 <td><a href="{{ polluser.get_absolute_url }}">{{ polluser.username }}</a></td>
-                <td>{{ polluser.weight }}</td>
+                <td>
+                    {% if answer.weight == None %}
+                        Нет установлен
+                    {% else %}
+                        {{ answer.weight }} %
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>
