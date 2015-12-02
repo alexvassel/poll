@@ -66,7 +66,7 @@ class FinishPollForm(forms.Form):
 class UserAnswerForm(BootstrapFormMixin, forms.Form):
     """Форма сохранения данного пользователем ответа"""
     question_pk = forms.IntegerField(widget=forms.HiddenInput())
-    answers_pks = forms.ChoiceField(label='')
+    answers_pks = forms.ChoiceField(label='', widget=forms.Select())
 
     select_field_name = 'answers_pks'
 
@@ -102,3 +102,9 @@ class UserAnswerForm(BootstrapFormMixin, forms.Form):
         widget_attrs = self.fields[self.select_field_name].widget.attrs
         self.fields[self.select_field_name].widget = (forms.SelectMultiple
                                                       (attrs=widget_attrs))
+
+    def clean_answers_pks(self):
+        """Здесь мы забираем "сырые" данные из формы
+        Тип поля ChoiceField не пропустит множественные параметры
+        """
+        return self.data.getlist('answers_pks')
