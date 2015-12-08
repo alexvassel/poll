@@ -28,17 +28,20 @@ class PollUser(AbstractUser):
 
 class Poll(models.Model):
     name = models.CharField(max_length=30, verbose_name=u'Имя')
-    slug = models.SlugField(unique=True, max_length=30, db_index=True)
+    slug = models.SlugField(max_length=30, db_index=True)
     weight = models.PositiveSmallIntegerField(verbose_name='Вес',
                                               db_index=True)
     created = models.ForeignKey(PollUser, related_name='created_polls',
                                 db_index=True)
 
+    class Meta:
+        unique_together = ('name', 'created')
+
     def get_absolute_url(self):
         return reverse('user_poll_details', args=[str(self.pk)])
 
     def save(self, *args, **kwargs):
-        # Созлаем slug транслитерацией имени
+        # Создаем slug транслитерацией имени
         self.slug = slugify(unidecode(self.name))
         super(Poll, self).save(*args, **kwargs)
 
