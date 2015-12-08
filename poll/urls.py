@@ -13,48 +13,48 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
     # Общие
-    url(r'^poll/(?P<pk>\d+)/finish/$', views.main.PollFinishView.as_view(),
+    url(r'^polls/(?P<pk>\d+)/finish/$', views.main.PollFinishView.as_view(),
         name='finish_poll'),
-    url(r'^poll/(?P<pk>\d+)/$', views.main.PollDetailView.as_view(),
+    url(r'^polls/(?P<pk>\d+)/$', views.main.PollDetailView.as_view(),
         name='poll_details'),
-    url(r'^poll/(?P<slug>[\w-]+)/try/$', views.main.PollTryView.as_view(),
+    url(r'^polls/(?P<slug>[\w-]+)/try/$', views.main.PollTryView.as_view(),
         name='try_poll'),
 
     url(r'^$', views.main.PollListView.as_view(anonymous=True), name='index'),
 
     # Ответы
-    url(r'^poll/(?P<poll_pk>\d+)/question/'
+    url(r'^polls/(?P<poll_pk>\d+)/question/'
         r'(?P<top_object_pk>\d+)/answer/'
         r'(?P<pk>\d+)/delete/',
         views.main.AnswerDeleteView.as_view(), name='answer_delete'),
-    url(r'^poll/(?P<poll_pk>\d+)/'
+    url(r'^polls/(?P<poll_pk>\d+)/'
         r'question/(?P<top_object_pk>\d+)/answer/(?P<pk>\d+)/edit/',
         views.main.AnswerUpdateView.as_view(), name='answer_edit'),
-    url(r'^poll/(?P<poll_pk>\d+)/question/'
+    url(r'^polls/(?P<poll_pk>\d+)/question/'
         r'(?P<top_object_pk>\d+)/answer/add/',
         views.main.AnswerCreateView.as_view(), name='answer_add'),
 
     # Вопросы
-    url(r'^poll/(?P<top_object_pk>\d+)/'
+    url(r'^polls/(?P<top_object_pk>\d+)/'
         r'question/(?P<pk>\d+)/delete/',
         views.main.QuestionDeleteView.as_view(), name='question_delete'),
-    url(r'^poll/(?P<top_object_pk>\d+)/'
+    url(r'^polls/(?P<top_object_pk>\d+)/'
         r'question/(?P<pk>\d+)/edit/',
         views.main.QuestionUpdateView.as_view(), name='question_edit'),
-    url(r'^poll/(?P<top_object_pk>\d+)/question/add/',
+    url(r'^polls/(?P<top_object_pk>\d+)/question/add/',
         views.main.QuestionCreateView.as_view(), name='question_add'),
 
 
     # Опросы
-    url(r'poll/(?P<pk>\d+)/delete/',
+    url(r'polls/(?P<pk>\d+)/delete/',
         views.main.PollDeleteView.as_view(), name='user_poll_delete'),
-    url(r'^poll/(?P<pk>\d+)/edit/',
+    url(r'^polls/(?P<pk>\d+)/edit/',
         views.main.PollUpdateView.as_view(), name='user_poll_edit'),
-    url(r'^poll/add/', views.main.PollCreateView.as_view(),
+    url(r'^polls/add/', views.main.PollCreateView.as_view(),
         name='user_poll_add'),
-    url(r'^poll/(?P<pk>\d+)/$',
+    url(r'^polls/(?P<pk>\d+)/$',
         views.main.PollDetailView.as_view(), name='user_poll_details'),
-    url(r'^polls/', views.main.PollListView.as_view(),
+    url(r'^polls/list/', views.main.PollListView.as_view(),
         name='user_polls'),
 
     # Статистика
